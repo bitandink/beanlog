@@ -60,16 +60,6 @@ function randomInteger(min: number, max: number) {
 ======================================== */
 
 function randomBinary() {
-  /*
-    1~10자리 이진수 생성
-
-    0
-    101
-    001101
-    1100101010
-    ...
-  */
-
   const length = randomInteger(1, 10);
 
   return Array.from(
@@ -83,10 +73,6 @@ function randomBinary() {
 ======================================== */
 
 function randomHex() {
-  /*
-    0x00 ~ 0xFF
-  */
-
   const value = randomInteger(0, 255);
 
   return `0x${value
@@ -100,13 +86,6 @@ function randomHex() {
 ======================================== */
 
 function generateDataText() {
-  /*
-    대부분은 이진수.
-
-    HEX가 너무 많으면
-    오히려 장식적으로 보여서 18%만.
-  */
-
   if (Math.random() < 0.82) {
     return randomBinary();
   }
@@ -115,40 +94,45 @@ function generateDataText() {
 }
 
 /* ========================================
-   RESIDENT PROXIMITY
+   RESIDENT POSITIONS
 
-   데이터를 아예 금지하지 않고
-   캐릭터 중심에 가까울수록 희미하게 처리.
+   캐릭터가 작아지고 위치가 바뀌었으므로
+   opacity 계산용 중심 좌표도 조정.
 ======================================== */
 
 const residentCenters = [
-  /*
-    PAMA
-  */
+  /* PAMA */
   {
-    x: 18,
-    y: 72,
-    radius: 21,
+    x: 20,
+    y: 62,
+    radius: 17,
   },
 
-  /*
-    BEAN
-  */
+  /* BEAN */
   {
     x: 50,
-    y: 74,
-    radius: 20,
+    y: 72,
+    radius: 16,
   },
 
-  /*
-    HODU
-  */
+  /* HODU */
   {
     x: 82,
-    y: 39,
-    radius: 20,
+    y: 38,
+    radius: 16,
   },
 ];
+
+/* ========================================
+   HODU REACTION
+======================================== */
+
+const HODU_CENTER = {
+  x: 82,
+  y: 38,
+};
+
+const HODU_REACTION_RADIUS = 27;
 
 /* ========================================
    DISTANCE
@@ -174,15 +158,7 @@ function calculateOpacity(
   x: number,
   y: number
 ) {
-  /*
-    기본 밝기도 랜덤.
-  */
-
-  let opacity = random(0.16, 0.42);
-
-  /*
-    가장 가까운 캐릭터와의 거리 확인.
-  */
+  let opacity = random(0.15, 0.4);
 
   for (const resident of residentCenters) {
     const d = distance(
@@ -193,24 +169,76 @@ function calculateOpacity(
     );
 
     if (d < resident.radius) {
-      /*
-        캐릭터 중심에 가까울수록 희미함.
-
-        중심부에서도 완전히 사라지지는 않게
-        최소 25% 정도는 남김.
-      */
-
       const proximity =
         d / resident.radius;
 
       const multiplier =
-        0.25 + proximity * 0.75;
+        0.28 + proximity * 0.72;
 
       opacity *= multiplier;
     }
   }
 
   return opacity;
+}
+
+/* ========================================
+   HODU ESCAPE VECTOR
+======================================== */
+
+function getHoduEscape(
+  item: FloatingData
+) {
+  const dx =
+    item.x - HODU_CENTER.x;
+
+  const dy =
+    item.y - HODU_CENTER.y;
+
+  const d = Math.sqrt(
+    dx * dx + dy * dy
+  );
+
+  if (d > HODU_REACTION_RADIUS) {
+    return {
+      active: false,
+      x: 0,
+      y: 0,
+    };
+  }
+
+  if (d < 0.5) {
+    const angle =
+      (item.id * 137.5 * Math.PI) / 180;
+
+    return {
+      active: true,
+
+      x:
+        Math.cos(angle) * 48,
+
+      y:
+        Math.sin(angle) * 48,
+    };
+  }
+
+  const proximity =
+    1 - d / HODU_REACTION_RADIUS;
+
+  const force =
+    15 + proximity * 38;
+
+  return {
+    active: true,
+
+    x:
+      (dx / d) *
+      force,
+
+    y:
+      (dy / d) *
+      force,
+  };
 }
 
 /* ========================================
@@ -223,74 +251,59 @@ function createFloatingData(
   return Array.from(
     { length: count },
     (_, index) => {
-      /*
-        가장자리 살짝 여유.
-      */
+      const x =
+        random(2, 96);
 
-      const x = random(2, 96);
-      const y = random(4, 94);
+      const y =
+        random(4, 94);
 
       return {
         id: index,
 
-        /*
-          문자열도 매번 새로 생성
-        */
-
-        text: generateDataText(),
-
-        /*
-          위치 완전 랜덤
-        */
+        text:
+          generateDataText(),
 
         x,
         y,
 
-        /*
-          크기도 랜덤
-        */
-
-        size: random(7, 13),
-
-        /*
-          캐릭터 근처에서는 자동으로
-          더 흐려짐.
-        */
+        size:
+          random(7, 13),
 
         opacity:
-          calculateOpacity(x, y),
+          calculateOpacity(
+            x,
+            y
+          ),
 
         /*
-          애니메이션 속도
+          이전보다 훨씬 느리게.
         */
 
         duration:
-          random(13, 30),
+          random(24, 52),
 
         /*
-          이미 떠다니고 있던 것처럼
-          animation 중간 지점에서 시작.
+          이미 공간에 떠 있던 것처럼
+          서로 다른 시점에서 시작.
         */
 
         delay:
-          random(-30, 0),
+          random(-50, 0),
 
         /*
-          이동 방향 / 거리
+          이동 거리는 조금 넓게.
+          대신 속도가 느려서
+          길게 흘러가는 느낌.
         */
 
         driftX:
-          random(-42, 42),
+          random(-58, 58),
 
         driftY:
-          random(-38, 38),
-
-        /*
-          미세한 회전도 각자 다르게.
-        */
+          random(-52, 52),
 
         rotation:
-          random(-2.5, 2.5),
+          random(-2, 2),
       };
     }
   );
@@ -346,20 +359,22 @@ export default function BeanlogWorld() {
   ] = useState(false);
 
   /* ========================================
-     RANDOM DATA STATE
+     HODU INTERACTION
+  ======================================== */
+
+  const [
+    hoduHovered,
+    setHoduHovered,
+  ] = useState(false);
+
+  /* ========================================
+     RANDOM DATA
   ======================================== */
 
   const [
     floatingData,
     setFloatingData,
   ] = useState<FloatingData[]>([]);
-
-  /*
-    브라우저 마운트 후 한 번만 생성.
-
-    React가 다시 렌더링되어도
-    데이터 위치는 바뀌지 않는다.
-  */
 
   useEffect(() => {
     setFloatingData(
@@ -499,11 +514,6 @@ export default function BeanlogWorld() {
         delay = 100;
       }
 
-      /*
-        environment가 로드되면
-        terminal docking을 기다림.
-      */
-
       if (
         line ===
         "> loading environment ........ OK"
@@ -516,11 +526,6 @@ export default function BeanlogWorld() {
         delay
       );
     };
-
-    /*
-      처음 시작할 때
-      잠깐 정적 상태 유지.
-    */
 
     timer = setTimeout(
       typeNextCharacter,
@@ -547,6 +552,10 @@ export default function BeanlogWorld() {
         terminalDocked
           ? "terminal-docked"
           : "",
+
+        hoduHovered
+          ? "hodu-engaged"
+          : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -568,44 +577,72 @@ export default function BeanlogWorld() {
         aria-hidden="true"
       >
         {floatingData.map(
-          (item) => (
-            <span
-              key={item.id}
-              className="floating-data"
-              style={
-                {
-                  "--x":
-                    `${item.x}%`,
+          (item) => {
+            const escape =
+              getHoduEscape(
+                item
+              );
 
-                  "--y":
-                    `${item.y}%`,
+            const isEscaping =
+              bootComplete &&
+              hoduHovered &&
+              escape.active;
 
-                  "--size":
-                    `${item.size}px`,
+            return (
+              <span
+                key={item.id}
+                className={[
+                  "floating-data-shell",
 
-                  "--duration":
-                    `${item.duration}s`,
+                  isEscaping
+                    ? "is-escaping"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={
+                  {
+                    "--x":
+                      `${item.x}%`,
 
-                  "--delay":
-                    `${item.delay}s`,
+                    "--y":
+                      `${item.y}%`,
 
-                  "--drift-x":
-                    `${item.driftX}px`,
+                    "--size":
+                      `${item.size}px`,
 
-                  "--drift-y":
-                    `${item.driftY}px`,
+                    "--duration":
+                      `${item.duration}s`,
 
-                  "--data-opacity":
-                    item.opacity,
+                    "--delay":
+                      `${item.delay}s`,
 
-                  "--rotation":
-                    `${item.rotation}deg`,
-                } as CSSProperties
-              }
-            >
-              {item.text}
-            </span>
-          )
+                    "--drift-x":
+                      `${item.driftX}px`,
+
+                    "--drift-y":
+                      `${item.driftY}px`,
+
+                    "--data-opacity":
+                      item.opacity,
+
+                    "--rotation":
+                      `${item.rotation}deg`,
+
+                    "--escape-x":
+                      `${escape.x}px`,
+
+                    "--escape-y":
+                      `${escape.y}px`,
+                  } as CSSProperties
+                }
+              >
+                <span className="floating-data">
+                  {item.text}
+                </span>
+              </span>
+            );
+          }
         )}
 
         <div className="node node-1" />
@@ -664,9 +701,7 @@ export default function BeanlogWorld() {
                         ? "terminal-welcome"
                         : "",
                     ]
-                      .filter(
-                        Boolean
-                      )
+                      .filter(Boolean)
                       .join(" ")}
                   >
                     {isCommand ? (
@@ -681,19 +716,15 @@ export default function BeanlogWorld() {
               }
             )}
 
-            {/* CURRENT LINE */}
-
             {!bootComplete ? (
               <p
                 className={
-                  typedLines.length ===
-                  0
+                  typedLines.length === 0
                     ? "terminal-command"
                     : ""
                 }
               >
-                {typedLines.length ===
-                0 ? (
+                {typedLines.length === 0 ? (
                   <span>
                     bean@beanlog:~$
                   </span>
@@ -704,8 +735,6 @@ export default function BeanlogWorld() {
                 <i className="terminal-cursor" />
               </p>
             ) : null}
-
-            {/* READY */}
 
             {bootComplete ? (
               <p className="terminal-command terminal-ready">
@@ -748,9 +777,11 @@ export default function BeanlogWorld() {
         <div className="hud-residents">
           <div>
             <span>01</span>
+
             <strong>
               BEAN
             </strong>
+
             <em>
               ACTIVE
             </em>
@@ -758,9 +789,11 @@ export default function BeanlogWorld() {
 
           <div>
             <span>02</span>
+
             <strong>
               PAMA
             </strong>
+
             <em>
               IDLE
             </em>
@@ -768,11 +801,15 @@ export default function BeanlogWorld() {
 
           <div>
             <span>03</span>
+
             <strong>
               HODU
             </strong>
+
             <em>
-              ???
+              {hoduHovered
+                ? "CHASING"
+                : "???"}
             </em>
           </div>
         </div>
@@ -803,13 +840,15 @@ export default function BeanlogWorld() {
             하아...
           </div>
 
-          <Image
-            src="/residents/pama.webp"
-            alt="Pama"
-            width={600}
-            height={600}
-            priority
-          />
+          <div className="resident-visual">
+            <Image
+              src="/residents/pama.webp"
+              alt="Pama"
+              width={600}
+              height={600}
+              priority
+            />
+          </div>
         </div>
 
         {/* BEAN */}
@@ -830,13 +869,15 @@ export default function BeanlogWorld() {
             집중 중...
           </div>
 
-          <Image
-            src="/residents/bean.webp"
-            alt="Bean"
-            width={600}
-            height={600}
-            priority
-          />
+          <div className="resident-visual">
+            <Image
+              src="/residents/bean.webp"
+              alt="Bean"
+              width={600}
+              height={600}
+              priority
+            />
+          </div>
         </div>
 
         {/* HODU */}
@@ -849,9 +890,25 @@ export default function BeanlogWorld() {
             hoduReady
               ? "is-visible"
               : "",
+
+            hoduHovered
+              ? "is-chasing"
+              : "",
           ]
             .filter(Boolean)
             .join(" ")}
+          onMouseEnter={() => {
+            if (bootComplete) {
+              setHoduHovered(
+                true
+              );
+            }
+          }}
+          onMouseLeave={() => {
+            setHoduHovered(
+              false
+            );
+          }}
         >
           <div className="speech-bubble speech-hodu">
             저거 잡으면
@@ -859,13 +916,15 @@ export default function BeanlogWorld() {
             재밌겠다!
           </div>
 
-          <Image
-            src="/residents/hodu.webp"
-            alt="Hodu"
-            width={600}
-            height={600}
-            priority
-          />
+          <div className="resident-visual">
+            <Image
+              src="/residents/hodu.webp"
+              alt="Hodu"
+              width={600}
+              height={600}
+              priority
+            />
+          </div>
         </div>
       </section>
     </main>
