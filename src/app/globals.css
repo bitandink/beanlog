@@ -1,0 +1,1074 @@
+/* ========================================
+   GLOBAL
+======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #02050a;
+  color: #e5e7eb;
+}
+
+
+/* ========================================
+   WORLD
+======================================== */
+
+.beanlog-world {
+  position: relative;
+
+  width: 100%;
+  height: 100svh;
+  min-height: 700px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 65%,
+      rgba(31, 77, 58, 0.18),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 78% 28%,
+      rgba(41, 74, 108, 0.13),
+      transparent 26%
+    ),
+    linear-gradient(
+      180deg,
+      #02050a 0%,
+      #050b12 50%,
+      #071018 100%
+    );
+}
+
+
+/* ========================================
+   SUBTLE GRID
+======================================== */
+
+.beanlog-world::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(98, 255, 174, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(98, 255, 174, 0.025) 1px,
+      transparent 1px
+    );
+
+  background-size: 48px 48px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 5%,
+    black 35%,
+    black 100%
+  );
+
+  pointer-events: none;
+}
+
+
+/* ========================================
+   DATA SPACE
+======================================== */
+
+.data-space {
+  position: absolute;
+  inset: 0;
+
+  z-index: 1;
+
+  opacity: 0;
+
+  transition:
+    opacity 1000ms ease;
+
+  pointer-events: none;
+}
+
+.data-space.is-visible {
+  opacity: 1;
+}
+
+
+/* ========================================
+   RANDOM FLOATING DATA
+======================================== */
+
+.floating-data {
+  position: absolute;
+
+  left: var(--x);
+  top: var(--y);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: var(--size);
+
+  letter-spacing: 0.12em;
+
+  color: rgb(87 255 166);
+
+  text-shadow:
+    0 0 10px rgba(87, 255, 166, 0.12);
+
+  opacity: var(--data-opacity);
+
+  animation:
+    data-float
+    var(--duration)
+    ease-in-out
+    var(--delay)
+    infinite
+    alternate;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* ========================================
+   DATA FLOAT ANIMATION
+======================================== */
+
+@keyframes data-float {
+  0% {
+    transform:
+      translate3d(0, 0, 0)
+      rotate(
+        calc(
+          var(--rotation) * -0.5
+        )
+      );
+
+    opacity:
+      calc(
+        var(--data-opacity) * 0.65
+      );
+  }
+
+  28% {
+    transform:
+      translate3d(
+        calc(
+          var(--drift-x) * 0.24
+        ),
+        calc(
+          var(--drift-y) * 0.18
+        ),
+        0
+      )
+      rotate(0deg);
+
+    opacity:
+      var(--data-opacity);
+  }
+
+  57% {
+    transform:
+      translate3d(
+        calc(
+          var(--drift-x) * 0.55
+        ),
+        calc(
+          var(--drift-y) * 0.62
+        ),
+        0
+      )
+      rotate(
+        var(--rotation)
+      );
+
+    opacity:
+      calc(
+        var(--data-opacity) * 0.72
+      );
+  }
+
+  79% {
+    transform:
+      translate3d(
+        calc(
+          var(--drift-x) * 0.82
+        ),
+        calc(
+          var(--drift-y) * 0.76
+        ),
+        0
+      )
+      rotate(
+        calc(
+          var(--rotation) * 0.4
+        )
+      );
+
+    opacity:
+      calc(
+        var(--data-opacity) * 0.9
+      );
+  }
+
+  100% {
+    transform:
+      translate3d(
+        var(--drift-x),
+        var(--drift-y),
+        0
+      )
+      rotate(
+        calc(
+          var(--rotation) * -0.25
+        )
+      );
+
+    opacity:
+      calc(
+        var(--data-opacity) * 0.6
+      );
+  }
+}
+
+
+/* ========================================
+   DATA NODES
+======================================== */
+
+.node {
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  border:
+    1px solid rgba(87, 255, 166, 0.4);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 12px rgba(87, 255, 166, 0.15);
+
+  animation:
+    node-pulse 4s
+    ease-in-out
+    infinite;
+}
+
+.node-1 {
+  top: 23%;
+  left: 38%;
+
+  animation-delay: -1s;
+}
+
+.node-2 {
+  top: 52%;
+  left: 73%;
+
+  animation-delay: -2.7s;
+}
+
+.node-3 {
+  top: 67%;
+  left: 29%;
+
+  animation-delay: -0.5s;
+}
+
+@keyframes node-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.25);
+  }
+}
+
+
+/* ========================================
+   RESIDENTS
+======================================== */
+
+.residents {
+  position: absolute;
+  inset: 0;
+
+  z-index: 10;
+
+  pointer-events: none;
+}
+
+.beanlog-world.boot-complete .residents {
+  pointer-events: auto;
+}
+
+
+/* ========================================
+   RESIDENT BASE
+======================================== */
+
+.resident {
+  position: absolute;
+
+  opacity: 0;
+
+  transition:
+    opacity 700ms ease;
+}
+
+.resident.is-visible {
+  opacity: 1;
+}
+
+.resident img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  filter:
+    drop-shadow(
+      0 20px 28px rgba(0, 0, 0, 0.45)
+    );
+
+  transition:
+    transform 220ms ease,
+    filter 220ms ease;
+}
+
+
+/* ========================================
+   RESIDENT HOVER
+======================================== */
+
+.beanlog-world.boot-complete
+.resident:hover img {
+  transform: translateY(-3px);
+
+  filter:
+    drop-shadow(
+      0 24px 32px rgba(0, 0, 0, 0.5)
+    )
+    drop-shadow(
+      0 0 12px rgba(82, 255, 159, 0.06)
+    );
+}
+
+
+/* ========================================
+   PAMA
+======================================== */
+
+.resident-pama {
+  width: clamp(
+    260px,
+    25vw,
+    440px
+  );
+
+  left: 7%;
+  bottom: 12%;
+}
+
+
+/* ========================================
+   BEAN
+======================================== */
+
+.resident-bean {
+  width: clamp(
+    240px,
+    22vw,
+    380px
+  );
+
+  left: 50%;
+  bottom: 10%;
+
+  transform: translateX(-50%);
+}
+
+
+/* ========================================
+   HODU
+======================================== */
+
+.resident-hodu {
+  width: clamp(
+    220px,
+    20vw,
+    350px
+  );
+
+  right: 8%;
+  top: 18%;
+
+  transform: rotate(-4deg);
+}
+
+
+/* ========================================
+   TERMINAL
+======================================== */
+
+.terminal-panel {
+  position: absolute;
+
+  z-index: 30;
+
+  /*
+    최종 docking 위치
+  */
+
+  top: 12%;
+  left: 6%;
+
+  width: clamp(
+    360px,
+    31vw,
+    520px
+  );
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(112, 255, 178, 0.14);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 15, 23, 0.88),
+      rgba(3, 8, 14, 0.82)
+    );
+
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+
+  backdrop-filter: blur(12px);
+
+  transition:
+    top 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ========================================
+   TERMINAL BOOT POSITION
+======================================== */
+
+/*
+  처음에는 화면 중앙
+*/
+
+.beanlog-world.booting
+.terminal-panel {
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+}
+
+
+/*
+  environment loading 완료 후
+  왼쪽으로 docking.
+
+  booting 규칙보다 반드시 아래에 있어야 함.
+*/
+
+.beanlog-world.terminal-docked
+.terminal-panel {
+  top: 12%;
+  left: 6%;
+
+  transform: translate(0, 0);
+}
+
+
+/* ========================================
+   TERMINAL TOP BAR
+======================================== */
+
+.terminal-bar {
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 14px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.055);
+
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+
+/* ========================================
+   TERMINAL DOTS
+======================================== */
+
+.terminal-dots {
+  display: flex;
+
+  gap: 6px;
+}
+
+.terminal-dots span {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(117, 255, 180, 0.38);
+}
+
+
+/* ========================================
+   TERMINAL LABEL
+======================================== */
+
+.terminal-label {
+  font-family: monospace;
+
+  font-size: 9px;
+
+  letter-spacing: 0.18em;
+
+  color:
+    rgba(148, 163, 184, 0.48);
+}
+
+
+/* ========================================
+   TERMINAL BODY
+======================================== */
+
+.terminal-body {
+  padding:
+    20px 22px 22px;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 12px;
+
+  line-height: 1.8;
+
+  color:
+    rgba(166, 181, 197, 0.68);
+}
+
+.terminal-body p {
+  margin: 0;
+}
+
+
+/* ========================================
+   TERMINAL OUTPUT
+======================================== */
+
+.terminal-output {
+  min-height: 220px;
+}
+
+.terminal-output p {
+  color:
+    rgba(148, 163, 184, 0.6);
+}
+
+
+/* ========================================
+   TERMINAL COMMAND
+======================================== */
+
+.terminal-command {
+  color:
+    rgba(226, 232, 240, 0.76)
+    !important;
+}
+
+.terminal-command span {
+  margin-right: 8px;
+
+  color:
+    rgba(82, 255, 159, 0.88);
+}
+
+
+/* ========================================
+   TERMINAL WELCOME
+======================================== */
+
+.terminal-welcome {
+  color:
+    rgba(82, 255, 159, 0.8)
+    !important;
+}
+
+
+/* ========================================
+   TERMINAL READY
+======================================== */
+
+.terminal-ready {
+  display: flex;
+
+  align-items: center;
+
+  margin-top:
+    16px !important;
+}
+
+
+/* ========================================
+   TERMINAL SPACER
+======================================== */
+
+.terminal-spacer {
+  height: 10px;
+}
+
+
+/* ========================================
+   TERMINAL CURSOR
+======================================== */
+
+.terminal-cursor {
+  display: inline-block;
+
+  width: 7px;
+  height: 14px;
+
+  margin-left: 2px;
+
+  vertical-align: -2px;
+
+  background:
+    rgba(82, 255, 159, 0.9);
+
+  animation:
+    cursor-blink
+    1s
+    steps(1)
+    infinite;
+}
+
+@keyframes cursor-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
+
+/* ========================================
+   SYSTEM HUD
+======================================== */
+
+.system-hud {
+  position: absolute;
+
+  z-index: 30;
+
+  top: 12%;
+  left: 37%;
+
+  width: clamp(
+    220px,
+    15vw,
+    280px
+  );
+
+  padding:
+    14px 16px 15px;
+
+  border:
+    1px solid rgba(112, 255, 178, 0.12);
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 15, 23, 0.72),
+      rgba(3, 8, 14, 0.58)
+    );
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+
+  backdrop-filter: blur(10px);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  color:
+    rgba(148, 163, 184, 0.62);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 700ms ease,
+    visibility 700ms ease;
+}
+
+
+/* boot 완료 후 HUD 등장 */
+
+.beanlog-world.boot-complete
+.system-hud {
+  opacity: 1;
+
+  visibility: visible;
+}
+
+
+/* ========================================
+   HUD HEADER
+======================================== */
+
+.hud-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 9px;
+  margin-bottom: 10px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.05);
+
+  font-size: 8px;
+
+  letter-spacing: 0.16em;
+}
+
+.hud-header > span:first-child {
+  color:
+    rgba(148, 163, 184, 0.55);
+}
+
+.hud-online {
+  color:
+    rgba(82, 255, 159, 0.72);
+}
+
+
+/* ========================================
+   HUD SUMMARY
+======================================== */
+
+.hud-summary {
+  display: flex;
+
+  align-items: baseline;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.hud-summary span {
+  font-size: 9px;
+
+  letter-spacing: 0.18em;
+
+  color:
+    rgba(148, 163, 184, 0.5);
+}
+
+.hud-summary strong {
+  font-size: 18px;
+
+  font-weight: 400;
+
+  letter-spacing: 0.08em;
+
+  color:
+    rgba(226, 232, 240, 0.82);
+}
+
+
+/* ========================================
+   HUD RESIDENT LIST
+======================================== */
+
+.hud-residents {
+  display: grid;
+
+  gap: 6px;
+}
+
+.hud-residents > div {
+  display: grid;
+
+  grid-template-columns:
+    24px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  min-height: 20px;
+
+  font-size: 9px;
+}
+
+.hud-residents span {
+  color:
+    rgba(100, 116, 139, 0.62);
+}
+
+.hud-residents strong {
+  font-size: 9px;
+
+  font-weight: 500;
+
+  letter-spacing: 0.1em;
+
+  color:
+    rgba(203, 213, 225, 0.72);
+}
+
+.hud-residents em {
+  font-size: 8px;
+
+  font-style: normal;
+
+  letter-spacing: 0.08em;
+
+  color:
+    rgba(82, 255, 159, 0.55);
+}
+
+
+/* ========================================
+   SPEECH BUBBLES
+======================================== */
+
+.speech-bubble {
+  position: absolute;
+
+  z-index: 40;
+
+  padding:
+    10px 14px;
+
+  border:
+    1px solid rgba(112, 255, 178, 0.22);
+
+  border-radius: 10px;
+
+  background:
+    rgba(8, 15, 23, 0.94);
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(10px);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 11px;
+
+  line-height: 1.6;
+
+  white-space: nowrap;
+
+  color:
+    rgba(226, 232, 240, 0.88);
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transform:
+    translateY(6px);
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 180ms ease;
+
+  pointer-events: none;
+}
+
+
+/* ========================================
+   SPEECH POINTER
+======================================== */
+
+.speech-bubble::after {
+  content: "";
+
+  position: absolute;
+
+  bottom: -5px;
+
+  width: 8px;
+  height: 8px;
+
+  background:
+    rgba(5, 11, 17, 0.88);
+
+  border-right:
+    1px solid rgba(112, 255, 178, 0.14);
+
+  border-bottom:
+    1px solid rgba(112, 255, 178, 0.14);
+
+  transform:
+    rotate(45deg);
+}
+
+
+/* ========================================
+   SPEECH HOVER
+======================================== */
+
+.beanlog-world.boot-complete
+.resident:hover
+.speech-bubble {
+  opacity: 1;
+
+  visibility: visible;
+}
+
+
+/* ========================================
+   PAMA SPEECH
+======================================== */
+
+.speech-pama {
+  top: 3%;
+  left: 88%;
+}
+
+.speech-pama::after {
+  left: -5px;
+  bottom: 14px;
+
+  border-right: 0;
+
+  border-bottom:
+    1px solid rgba(112, 255, 178, 0.22);
+
+  border-left:
+    1px solid rgba(112, 255, 178, 0.22);
+
+  transform:
+    rotate(45deg);
+}
+
+
+/* ========================================
+   BEAN SPEECH
+======================================== */
+
+.speech-bean {
+  top: -11%;
+  left: 50%;
+
+  transform:
+    translate(-50%, 6px);
+}
+
+.beanlog-world.boot-complete
+.resident-bean:hover
+.speech-bean {
+  transform:
+    translate(-50%, 0);
+}
+
+.speech-bean::after {
+  left: 50%;
+
+  margin-left: -4px;
+}
+
+
+/* ========================================
+   HODU SPEECH
+======================================== */
+
+.speech-hodu {
+  top: -10%;
+  left: 3%;
+}
+
+.speech-hodu::after {
+  right: 22px;
+}
+
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-data,
+  .node,
+  .terminal-cursor {
+    animation: none;
+  }
+
+  .terminal-panel,
+  .resident,
+  .data-space,
+  .system-hud {
+    transition-duration: 0.01ms;
+  }
+}
