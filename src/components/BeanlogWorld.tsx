@@ -2055,7 +2055,7 @@ export default function BeanlogWorld() {
 
           <div className="resident-visual">
             <Image
-              src="/residents/pama.webp"
+              src="/bitandink/residents/pama.webp"
               alt="Pama"
               width={600}
               height={600}
@@ -2100,7 +2100,7 @@ export default function BeanlogWorld() {
 
           <div className="resident-visual">
             <Image
-              src="/residents/bean.webp"
+              src="/bitandink/residents/bean.webp"
               alt="Bean"
               width={600}
               height={600}
