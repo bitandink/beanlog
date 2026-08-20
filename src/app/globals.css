@@ -1556,6 +1556,12 @@ body {
    TERMINAL INPUT
 ======================================== */
 
+.terminal-input::placeholder {
+  color: rgba(148, 163, 184, 0.28);
+
+  opacity: 1;
+}
+
 .terminal-input-row {
   display: flex;
 

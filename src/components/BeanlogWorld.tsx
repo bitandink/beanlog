@@ -1919,6 +1919,7 @@ export default function BeanlogWorld() {
                       event.target.value
                     )
                   }
+                  placeholder="try 'help'..."
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
