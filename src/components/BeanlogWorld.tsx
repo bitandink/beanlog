@@ -2171,11 +2171,12 @@ export default function BeanlogWorld() {
 
           <div className="resident-visual">
             <Image
-              src="/residents/hodu.webp"
+              src="/bitandink/residents/hodu.webp"
               alt="Hodu"
               width={600}
               height={600}
               priority
+              unoptimized
             />
           </div>
         </div>
