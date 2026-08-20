@@ -61,20 +61,437 @@ type FloatingData = {
 };
 
 /* ========================================
-   RANDOM HELPERS
+   RESIDENT TYPES
 ======================================== */
 
-function random(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
+type ResidentId = "bean" | "pama" | "hodu";
 
-function randomInteger(min: number, max: number) {
-  return Math.floor(random(min, max + 1));
+type ResidentProfile = {
+  id: ResidentId;
+
+  number: string;
+  name: string;
+
+  type: string;
+  age?: string;
+
+  tagline: string;
+
+  traits: string[];
+  favorites: string[];
+
+  note: string;
+};
+
+type ResidentRuntimeState = {
+  status: string;
+  visible: boolean;
+  message: string;
+};
+
+type ResidentRuntime = Record<
+  ResidentId,
+  ResidentRuntimeState
+>;
+
+type KstTime = {
+  hour: number;
+  minute: number;
+  label: string;
+};
+
+/* ========================================
+   RESIDENT PROFILES
+======================================== */
+
+const residentProfiles: Record<
+  ResidentId,
+  ResidentProfile
+> = {
+  bean: {
+    id: "bean",
+
+    number: "01",
+
+    name: "BEAN",
+
+    type: "HUMAN / DEVELOPER",
+
+    tagline:
+      "Usually coding. Sometimes reading. Occasionally eating.",
+
+    traits: [
+      "주로 코딩을 하고 있음",
+      "책 읽는 걸 좋아함",
+      "조용히 혼자 뭔가 하는 걸 좋아함",
+      "beanlog의 관리인이자 주민",
+    ],
+
+    favorites: [
+      "코드",
+      "책",
+      "조용한 시간",
+      "맛있는 것",
+    ],
+
+    note:
+      "엄..ㅁ..ㅏ... 아니, 언니(bitandink)의 명령대로 beanlog 안에서 이것저것 만들고 고치며 살아가는 주민. 대체로 조용하지만 머릿속은 늘 뭔가 만들 생각으로 바쁘다.",
+  },
+
+  pama: {
+    id: "pama",
+
+    number: "02",
+
+    name: "PAMA",
+
+    type: "BICHON",
+
+    age: "10 YEARS",
+
+    tagline:
+      "Mostly sleeping. Occasionally complaining.",
+
+    traits: [
+      "사람을 좋아함",
+      "강아지는 별로 안 좋아함",
+      "대체로 순하고 얌전함",
+      "원하는 것이 있으면 엄청난 찡찡보가 됨",
+    ],
+
+    favorites: [
+      "엄마",
+      "언니 베개",
+      "언니 이불",
+      "잠",
+    ],
+
+    note:
+      "언니(bitandink)가 데려왔지만 세상에서 엄마(bitandink 모친)를 제일 좋아한다.",
+  },
+
+  hodu: {
+    id: "hodu",
+
+    number: "03",
+
+    name: "HODU",
+
+    type: "POODLE",
+
+    age: "8 YEARS",
+
+    tagline:
+      "Highly curious. Probably planning something.",
+
+    traits: [
+      "똥꼬발랄",
+      "엄청난 겁보",
+      "엄살쟁이",
+      "호기심이 많음",
+      "은근 고집과 줏대가 강함",
+    ],
+
+    favorites: [
+      "언니 옆",
+      "사고 치기",
+      "궁금한 것 쫓아가기",
+      "의외로 엄마",
+    ],
+
+    note:
+      "낯선 사람에게 엄청 사납게 짖지만 사실 짖기만 하는 쫄보다. 넥카라는 거의 분신.",
+  },
+};
+
+/* ========================================
+   KST TIME
+======================================== */
+
+function getKstTime(): KstTime {
+  const formatter = new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      timeZone: "Asia/Seoul",
+
+      hour: "2-digit",
+      minute: "2-digit",
+
+      hourCycle: "h23",
+    }
+  );
+
+  const parts = formatter.formatToParts(
+    new Date()
+  );
+
+  const hour = Number(
+    parts.find(
+      (part) => part.type === "hour"
+    )?.value ?? 0
+  );
+
+  const minute = Number(
+    parts.find(
+      (part) => part.type === "minute"
+    )?.value ?? 0
+  );
+
+  return {
+    hour,
+    minute,
+
+    label: `${String(hour).padStart(
+      2,
+      "0"
+    )}:${String(minute).padStart(2, "0")}`,
+  };
 }
 
 /* ========================================
-   RANDOM BINARY
+   RESIDENT SCHEDULE
 ======================================== */
+
+function getResidentRuntime(
+  hour: number
+): ResidentRuntime {
+  /* 00:00 ~ 05:59 */
+
+  if (hour >= 0 && hour < 6) {
+    return {
+      bean: {
+        status: "ACTIVE...?",
+        visible: true,
+        message:
+          "resident should probably be sleeping.",
+      },
+
+      pama: {
+        status: "SLEEPING",
+        visible: false,
+        message:
+          "probably sleeping on bitandink's pillow.",
+      },
+
+      hodu: {
+        status: "SLEEPING",
+        visible: false,
+        message:
+          "escaped into the data stream.",
+      },
+    };
+  }
+
+  /* 06:00 ~ 08:59 */
+
+  if (hour >= 6 && hour < 9) {
+    return {
+      bean: {
+        status: "BOOTING",
+        visible: true,
+        message:
+          "starting another day in beanlog.",
+      },
+
+      pama: {
+        status: "SLEEPING",
+        visible: false,
+        message: "resident unavailable.",
+      },
+
+      hodu: {
+        status: "SLEEPING",
+        visible: false,
+        message: "do not disturb.",
+      },
+    };
+  }
+
+  /* 09:00 ~ 11:59 */
+
+  if (hour >= 9 && hour < 12) {
+    return {
+      bean: {
+        status: "ACTIVE",
+        visible: true,
+        message: "currently working.",
+      },
+
+      pama: {
+        status: "IDLE",
+        visible: true,
+        message: "probably doing nothing.",
+      },
+
+      hodu: {
+        status: "ROAMING",
+        visible: true,
+        message:
+          "searching for something interesting.",
+      },
+    };
+  }
+
+  /* 12:00 ~ 13:59 */
+
+  if (hour >= 12 && hour < 14) {
+    return {
+      bean: {
+        status: "LUNCH",
+        visible: false,
+        message:
+          "resident entered the data stream for lunch.",
+      },
+
+      pama: {
+        status: "FEEDING",
+        visible: false,
+        message:
+          "food detected. resident unavailable.",
+      },
+
+      hodu: {
+        status: "SCAVENGING",
+        visible: true,
+        message: "looking for leftovers.",
+      },
+    };
+  }
+
+  /* 14:00 ~ 17:59 */
+
+  if (hour >= 14 && hour < 18) {
+    return {
+      bean: {
+        status: "ACTIVE",
+        visible: true,
+        message: "currently working.",
+      },
+
+      pama: {
+        status: "IDLE",
+        visible: true,
+        message:
+          "still doing almost nothing.",
+      },
+
+      hodu: {
+        status: "ROAMING",
+        visible: true,
+        message:
+          "probably about to cause trouble.",
+      },
+    };
+  }
+
+  /* 18:00 ~ 21:59 */
+
+  if (hour >= 18 && hour < 22) {
+    return {
+      bean: {
+        status: "IDLE",
+        visible: true,
+        message: "workload reduced.",
+      },
+
+      pama: {
+        status: "ACTIVE",
+        visible: true,
+        message: "surprisingly awake.",
+      },
+
+      hodu: {
+        status: "ACTIVE",
+        visible: true,
+        message:
+          "energy level suspiciously high.",
+      },
+    };
+  }
+
+  /* 22:00 ~ 23:59 */
+
+  return {
+    bean: {
+      status: "LOW POWER",
+      visible: true,
+      message:
+        "resident should stop working soon.",
+    },
+
+    pama: {
+      status: "SLEEPING",
+      visible: false,
+      message:
+        "probably occupying bitandink's pillow.",
+    },
+
+    hodu: {
+      status: "SLEEPING",
+      visible: false,
+      message:
+        "escaped into the data stream.",
+    },
+  };
+}
+
+/* ========================================
+   RESIDENT DIALOGUE
+======================================== */
+
+function getResidentDialogue(
+  id: ResidentId,
+  status: string
+) {
+  const dialogues: Record<
+    ResidentId,
+    Record<string, string>
+  > = {
+    bean: {
+      "ACTIVE...?": "자야 하는데...",
+      BOOTING: "부팅 중...",
+      ACTIVE: "집중 중...",
+      LUNCH: "밥 먹으러 가는 중...",
+      IDLE: "오늘은 여기까지 할까...",
+      "LOW POWER": "진짜 이것만 하고...",
+    },
+
+    pama: {
+      SLEEPING: "자는 중...",
+      IDLE: "또 저러고 있네...",
+      FEEDING: "밥?",
+      ACTIVE: "엄마 어디 갔지...",
+    },
+
+    hodu: {
+      SLEEPING: "자는 중...",
+      ROAMING: "뭐 재밌는 거 없나?",
+      SCAVENGING: "뭐 떨어진 거 없나?",
+      ACTIVE: "저건 뭐지?",
+      CHASING: "저거 잡으면\n재밌겠다!",
+    },
+  };
+
+  return dialogues[id][status] ?? "...";
+}
+
+/* ========================================
+   RANDOM HELPERS
+======================================== */
+
+function random(
+  min: number,
+  max: number
+) {
+  return Math.random() * (max - min) + min;
+}
+
+function randomInteger(
+  min: number,
+  max: number
+) {
+  return Math.floor(random(min, max + 1));
+}
 
 function randomBinary() {
   const length = randomInteger(1, 10);
@@ -85,10 +502,6 @@ function randomBinary() {
   ).join("");
 }
 
-/* ========================================
-   RANDOM HEX
-======================================== */
-
 function randomHex() {
   const value = randomInteger(0, 255);
 
@@ -97,10 +510,6 @@ function randomHex() {
     .toUpperCase()
     .padStart(2, "0")}`;
 }
-
-/* ========================================
-   GENERATE DATA TEXT
-======================================== */
 
 function generateDataText() {
   if (Math.random() < 0.82) {
@@ -115,21 +524,18 @@ function generateDataText() {
 ======================================== */
 
 const residentCenters = [
-  /* PAMA */
   {
     x: 20,
     y: 62,
     radius: 17,
   },
 
-  /* BEAN */
   {
     x: 50,
     y: 72,
     radius: 16,
   },
 
-  /* HODU */
   {
     x: 82,
     y: 38,
@@ -138,7 +544,7 @@ const residentCenters = [
 ];
 
 /* ========================================
-   HODU REACTION
+   HODU
 ======================================== */
 
 const HODU_CENTER = {
@@ -197,17 +603,14 @@ function calculateOpacity(
 }
 
 /* ========================================
-   HODU ESCAPE VECTOR
+   HODU ESCAPE
 ======================================== */
 
 function getHoduEscape(
   item: FloatingData
 ) {
-  const dx =
-    item.x - HODU_CENTER.x;
-
-  const dy =
-    item.y - HODU_CENTER.y;
+  const dx = item.x - HODU_CENTER.x;
+  const dy = item.y - HODU_CENTER.y;
 
   const d = Math.sqrt(
     dx * dx + dy * dy
@@ -228,11 +631,9 @@ function getHoduEscape(
     return {
       active: true,
 
-      x:
-        Math.cos(angle) * 48,
+      x: Math.cos(angle) * 48,
 
-      y:
-        Math.sin(angle) * 48,
+      y: Math.sin(angle) * 48,
     };
   }
 
@@ -245,18 +646,14 @@ function getHoduEscape(
   return {
     active: true,
 
-    x:
-      (dx / d) *
-      force,
+    x: (dx / d) * force,
 
-    y:
-      (dy / d) *
-      force,
+    y: (dy / d) * force,
   };
 }
 
 /* ========================================
-   CREATE RANDOM FLOATING DATA
+   CREATE DATA
 ======================================== */
 
 function createFloatingData(
@@ -264,45 +661,32 @@ function createFloatingData(
 ): FloatingData[] {
   return Array.from(
     { length: count },
-    (_, index) => {
-      const x =
-        random(2, 96);
 
-      const y =
-        random(4, 94);
+    (_, index) => {
+      const x = random(2, 96);
+      const y = random(4, 94);
 
       return {
         id: index,
 
-        text:
-          generateDataText(),
+        text: generateDataText(),
 
         x,
         y,
 
-        size:
-          random(7, 13),
+        size: random(7, 13),
 
-        opacity:
-          calculateOpacity(
-            x,
-            y
-          ),
+        opacity: calculateOpacity(x, y),
 
-        duration:
-          random(24, 52),
+        duration: random(24, 52),
 
-        delay:
-          random(-50, 0),
+        delay: random(-50, 0),
 
-        driftX:
-          random(-58, 58),
+        driftX: random(-58, 58),
 
-        driftY:
-          random(-52, 52),
+        driftY: random(-52, 52),
 
-        rotation:
-          random(-2, 2),
+        rotation: random(-2, 2),
       };
     }
   );
@@ -314,7 +698,7 @@ function createFloatingData(
 
 export default function BeanlogWorld() {
   /* ========================================
-     BOOT STATES
+     BOOT
   ======================================== */
 
   const [
@@ -358,7 +742,40 @@ export default function BeanlogWorld() {
   ] = useState(false);
 
   /* ========================================
-     TERMINAL STATE
+     KST
+  ======================================== */
+
+  const [
+    kstTime,
+    setKstTime,
+  ] = useState<KstTime>({
+    hour: 12,
+    minute: 0,
+    label: "12:00",
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      setKstTime(getKstTime());
+    };
+
+    updateTime();
+
+    const timer = window.setInterval(
+      updateTime,
+      60_000
+    );
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const runtime =
+    getResidentRuntime(kstTime.hour);
+
+  /* ========================================
+     TERMINAL
   ======================================== */
 
   const [
@@ -381,6 +798,15 @@ export default function BeanlogWorld() {
     useRef(0);
 
   /* ========================================
+     PROFILE
+  ======================================== */
+
+  const [
+    selectedResident,
+    setSelectedResident,
+  ] = useState<ResidentId | null>(null);
+
+  /* ========================================
      HODU INTERACTION
   ======================================== */
 
@@ -395,7 +821,20 @@ export default function BeanlogWorld() {
   ] = useState<number | null>(null);
 
   /* ========================================
-     RANDOM DATA
+     RANDOM DIALOGUE
+  ======================================== */
+
+  const [
+    visibleDialogue,
+    setVisibleDialogue,
+  ] = useState<Record<ResidentId, boolean>>({
+    bean: false,
+    pama: false,
+    hodu: false,
+  });
+
+  /* ========================================
+     FLOATING DATA
   ======================================== */
 
   const [
@@ -410,7 +849,194 @@ export default function BeanlogWorld() {
   }, []);
 
   /* ========================================
-     TERMINAL AUTO FOCUS
+     DISPLAY STATUS
+  ======================================== */
+
+  const hoduDisplayStatus =
+    hoduHovered &&
+    runtime.hodu.visible
+      ? "CHASING"
+      : runtime.hodu.status;
+
+  /* ========================================
+     RANDOM DIALOGUE SCHEDULER
+  ======================================== */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const timers: number[] = [];
+
+    const scheduleDialogue = (
+      id: ResidentId
+    ) => {
+      const scheduleNext = () => {
+        if (cancelled) {
+          return;
+        }
+
+        /*
+          15 ~ 35초 기다림
+        */
+
+        const wait =
+          15000 +
+          Math.random() * 20000;
+
+        const waitTimer =
+          window.setTimeout(() => {
+            if (cancelled) {
+              return;
+            }
+
+            /*
+              화면에 실제 존재하는
+              Resident만 혼잣말.
+            */
+
+            if (runtime[id].visible) {
+              setVisibleDialogue(
+                (prev) => ({
+                  ...prev,
+
+                  [id]: true,
+                })
+              );
+
+              /*
+                2.5 ~ 4초 동안 보임
+              */
+
+              const duration =
+                2500 +
+                Math.random() * 1500;
+
+              const hideTimer =
+                window.setTimeout(() => {
+                  if (cancelled) {
+                    return;
+                  }
+
+                  setVisibleDialogue(
+                    (prev) => ({
+                      ...prev,
+
+                      [id]: false,
+                    })
+                  );
+
+                  scheduleNext();
+                }, duration);
+
+              timers.push(hideTimer);
+
+              return;
+            }
+
+            /*
+              지금 없는 캐릭터라면
+              다시 다음 시점 예약.
+            */
+
+            scheduleNext();
+          }, wait);
+
+        timers.push(waitTimer);
+      };
+
+      scheduleNext();
+    };
+
+    scheduleDialogue("bean");
+    scheduleDialogue("pama");
+    scheduleDialogue("hodu");
+
+    return () => {
+      cancelled = true;
+
+      timers.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+    };
+  }, [
+    kstTime.hour,
+    runtime.bean.visible,
+    runtime.pama.visible,
+    runtime.hodu.visible,
+  ]);
+
+  /* ========================================
+     HIDE DIALOGUE WHEN RESIDENT LEAVES
+  ======================================== */
+
+  useEffect(() => {
+    setVisibleDialogue((prev) => ({
+      bean:
+        runtime.bean.visible
+          ? prev.bean
+          : false,
+
+      pama:
+        runtime.pama.visible
+          ? prev.pama
+          : false,
+
+      hodu:
+        runtime.hodu.visible
+          ? prev.hodu
+          : false,
+    }));
+  }, [
+    runtime.bean.visible,
+    runtime.pama.visible,
+    runtime.hodu.visible,
+  ]);
+
+  /* ========================================
+     IF HODU GOES AWAY
+  ======================================== */
+
+  useEffect(() => {
+    if (runtime.hodu.visible) {
+      return;
+    }
+
+    setHoduHovered(false);
+    setHoduTargetId(null);
+  }, [runtime.hodu.visible]);
+
+  /* ========================================
+     PROFILE ESC
+  ======================================== */
+
+  useEffect(() => {
+    if (!selectedResident) {
+      return;
+    }
+
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
+      if (event.key === "Escape") {
+        setSelectedResident(null);
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [selectedResident]);
+
+  /* ========================================
+     TERMINAL FOCUS
   ======================================== */
 
   useEffect(() => {
@@ -422,8 +1048,9 @@ export default function BeanlogWorld() {
       terminalInputRef.current?.focus();
     }, 250);
 
-    return () =>
+    return () => {
       clearTimeout(timer);
+    };
   }, [bootComplete]);
 
   /* ========================================
@@ -452,32 +1079,42 @@ export default function BeanlogWorld() {
   ]);
 
   /* ========================================
-     HODU TARGET / CHASE
+     HODU INTERACTION
   ======================================== */
 
   function engageHodu() {
-    if (!bootComplete) {
+    if (
+      !bootComplete ||
+      !runtime.hodu.visible
+    ) {
       return;
     }
+
+    /*
+      랜덤 혼잣말은 잠시 끄고
+      CHASING 대사로 강제 전환.
+    */
+
+    setVisibleDialogue((prev) => ({
+      ...prev,
+      hodu: false,
+    }));
 
     setHoduHovered(true);
 
     const nearbyData =
-      floatingData.filter(
-        (item) => {
-          const d = distance(
-            item.x,
-            item.y,
-            HODU_CENTER.x,
-            HODU_CENTER.y
-          );
+      floatingData.filter((item) => {
+        const d = distance(
+          item.x,
+          item.y,
+          HODU_CENTER.x,
+          HODU_CENTER.y
+        );
 
-          return (
-            d <=
-            HODU_REACTION_RADIUS
-          );
-        }
-      );
+        return (
+          d <= HODU_REACTION_RADIUS
+        );
+      });
 
     if (
       nearbyData.length === 0
@@ -495,9 +1132,7 @@ export default function BeanlogWorld() {
         )
       ];
 
-    setHoduTargetId(
-      target.id
-    );
+    setHoduTargetId(target.id);
   }
 
   function disengageHodu() {
@@ -507,7 +1142,7 @@ export default function BeanlogWorld() {
   }
 
   /* ========================================
-     TERMINAL HISTORY HELPERS
+     TERMINAL HISTORY
   ======================================== */
 
   function createHistoryItem(
@@ -518,6 +1153,7 @@ export default function BeanlogWorld() {
 
     return {
       id: terminalHistoryId.current,
+
       type,
       text,
     };
@@ -526,21 +1162,18 @@ export default function BeanlogWorld() {
   function addTerminalOutput(
     lines: string[]
   ) {
-    const outputItems =
-      lines.map(
-        (line) =>
-          createHistoryItem(
-            "output",
-            line
-          )
+    const items =
+      lines.map((line) =>
+        createHistoryItem(
+          "output",
+          line
+        )
       );
 
-    setTerminalHistory(
-      (prev) => [
-        ...prev,
-        ...outputItems,
-      ]
-    );
+    setTerminalHistory((prev) => [
+      ...prev,
+      ...items,
+    ]);
   }
 
   /* ========================================
@@ -560,10 +1193,7 @@ export default function BeanlogWorld() {
       return;
     }
 
-    /*
-      clear는 실행된 명령 자체도
-      화면에 남기지 않고 history를 정리.
-    */
+    /* CLEAR */
 
     if (command === "clear") {
       setTerminalHistory([]);
@@ -571,18 +1201,14 @@ export default function BeanlogWorld() {
       return;
     }
 
-    const commandItem =
+    setTerminalHistory((prev) => [
+      ...prev,
+
       createHistoryItem(
         "command",
         original
-      );
-
-    setTerminalHistory(
-      (prev) => [
-        ...prev,
-        commandItem,
-      ]
-    );
+      ),
+    ]);
 
     /* HELP */
 
@@ -592,6 +1218,12 @@ export default function BeanlogWorld() {
         ">",
         "> help",
         "> residents",
+        "> bean",
+        "> pama",
+        "> hodu",
+        "> where bean",
+        "> where pama",
+        "> where hodu",
         "> about",
         "> status",
         "> clear",
@@ -601,15 +1233,137 @@ export default function BeanlogWorld() {
       return;
     }
 
+    /* ========================================
+       OPEN PROFILE
+    ======================================== */
+
+    if (
+      command === "bean" ||
+      command === "open bean" ||
+      command === "resident bean"
+    ) {
+      addTerminalOutput([
+        "> opening resident profile: BEAN",
+      ]);
+
+      setSelectedResident("bean");
+
+      return;
+    }
+
+    if (
+      command === "pama" ||
+      command === "open pama" ||
+      command === "resident pama"
+    ) {
+      addTerminalOutput([
+        "> opening resident profile: PAMA",
+      ]);
+
+      setSelectedResident("pama");
+
+      return;
+    }
+
+    if (
+      command === "hodu" ||
+      command === "open hodu" ||
+      command === "resident hodu"
+    ) {
+      addTerminalOutput([
+        "> opening resident profile: HODU",
+      ]);
+
+      setSelectedResident("hodu");
+
+      return;
+    }
+
+    /* ========================================
+       WHERE
+    ======================================== */
+
+    if (command === "where bean") {
+      addTerminalOutput([
+        "> BEAN",
+
+        `> status ...... ${runtime.bean.status}`,
+
+        `> location .... ${
+          runtime.bean.visible
+            ? "beanlog space"
+            : "data stream"
+        }`,
+
+        `> note ........ ${runtime.bean.message}`,
+      ]);
+
+      return;
+    }
+
+    if (command === "where pama") {
+      addTerminalOutput([
+        "> PAMA",
+
+        `> status ...... ${runtime.pama.status}`,
+
+        `> location .... ${
+          runtime.pama.visible
+            ? "beanlog space"
+            : "data stream"
+        }`,
+
+        `> note ........ ${runtime.pama.message}`,
+      ]);
+
+      return;
+    }
+
+    if (command === "where hodu") {
+      addTerminalOutput([
+        "> HODU",
+
+        `> status ...... ${hoduDisplayStatus}`,
+
+        `> location .... ${
+          runtime.hodu.visible
+            ? "beanlog space"
+            : "data stream"
+        }`,
+
+        `> note ........ ${runtime.hodu.message}`,
+      ]);
+
+      return;
+    }
+
     /* RESIDENTS */
 
-    if (command === "residents") {
+    if (
+      command === "residents"
+    ) {
+      const visibleCount = (
+        Object.keys(
+          runtime
+        ) as ResidentId[]
+      ).filter(
+        (id) =>
+          runtime[id].visible
+      ).length;
+
       addTerminalOutput([
         "> resident registry:",
         ">",
-        "> 01  BEAN  .... ACTIVE",
-        "> 02  PAMA  .... IDLE",
-        "> 03  HODU  .... ???",
+
+        `> 01  BEAN  .... ${runtime.bean.status}`,
+
+        `> 02  PAMA  .... ${runtime.pama.status}`,
+
+        `> 03  HODU  .... ${hoduDisplayStatus}`,
+
+        ">",
+
+        `> visible residents: ${visibleCount} / 3`,
       ]);
 
       return;
@@ -633,25 +1387,42 @@ export default function BeanlogWorld() {
     /* STATUS */
 
     if (command === "status") {
+      const visibleCount = (
+        Object.keys(
+          runtime
+        ) as ResidentId[]
+      ).filter(
+        (id) =>
+          runtime[id].visible
+      ).length;
+
       addTerminalOutput([
         "> BEANLOG.SYSTEM",
         ">",
-        "> environment .... ONLINE",
-        "> residents ...... 03",
-        "> data stream .... STABLE",
-        "> terminal ....... READY",
+
+        `> local time ...... ${kstTime.label} KST`,
+
+        "> environment ..... ONLINE",
+
+        "> residents ....... 03",
+
+        `> visible ......... ${String(
+          visibleCount
+        ).padStart(2, "0")}`,
+
+        "> data stream ..... STABLE",
+
+        "> terminal ........ READY",
       ]);
 
       return;
     }
 
-    /* BITANDINK */
+    /* GOTO */
 
     if (
-      command ===
-        "goto bitandink" ||
-      command ===
-        "goto bitandink.site"
+      command === "goto bitandink" ||
+      command === "goto bitandink.site"
     ) {
       addTerminalOutput([
         "> locating bitandink...",
@@ -665,6 +1436,7 @@ export default function BeanlogWorld() {
 
     addTerminalOutput([
       `> command not found: ${command}`,
+
       "> type 'help' for available commands.",
     ]);
   }
@@ -695,23 +1467,20 @@ export default function BeanlogWorld() {
   }
 
   /* ========================================
-     TERMINAL BOOT
+     BOOT TYPING
   ======================================== */
 
   useEffect(() => {
     let lineIndex = 0;
     let charIndex = 0;
 
-    let timer:
-      ReturnType<typeof setTimeout>;
+    let timer: ReturnType<
+      typeof setTimeout
+    >;
 
     const typeNextCharacter = () => {
       const line =
         bootLines[lineIndex];
-
-      /* ----------------------------------------
-         CHARACTER TYPING
-      ---------------------------------------- */
 
       if (
         charIndex <
@@ -734,34 +1503,19 @@ export default function BeanlogWorld() {
         return;
       }
 
-      /* ----------------------------------------
-         LINE COMPLETE
-      ---------------------------------------- */
-
-      setTypedLines(
-        (prev) => [
-          ...prev,
-          line,
-        ]
-      );
+      setTypedLines((prev) => [
+        ...prev,
+        line,
+      ]);
 
       setCurrentText("");
-
-      /* ========================================
-         BOOT EVENTS
-      ======================================== */
 
       if (
         line ===
         "> loading environment ........ OK"
       ) {
-        setEnvironmentReady(
-          true
-        );
-
-        setTerminalDocked(
-          true
-        );
+        setEnvironmentReady(true);
+        setTerminalDocked(true);
       }
 
       if (
@@ -785,43 +1539,25 @@ export default function BeanlogWorld() {
         setHoduReady(true);
       }
 
-      /* ----------------------------------------
-         NEXT LINE
-      ---------------------------------------- */
-
       lineIndex += 1;
       charIndex = 0;
-
-      /* ----------------------------------------
-         BOOT COMPLETE
-      ---------------------------------------- */
 
       if (
         lineIndex >=
         bootLines.length
       ) {
-        timer = setTimeout(
-          () => {
-            setBootComplete(
-              true
-            );
-          },
-          700
-        );
+        timer = setTimeout(() => {
+          setBootComplete(true);
+        }, 700);
 
         return;
       }
 
-      /* ----------------------------------------
-         LINE DELAY
-      ---------------------------------------- */
-
       let delay = 350;
 
       if (
-        bootLines[
-          lineIndex
-        ] === ""
+        bootLines[lineIndex] ===
+        ""
       ) {
         delay = 100;
       }
@@ -844,9 +1580,50 @@ export default function BeanlogWorld() {
       700
     );
 
-    return () =>
+    return () => {
       clearTimeout(timer);
+    };
   }, []);
+
+  /* ========================================
+     PROFILE
+  ======================================== */
+
+  const activeProfile =
+    selectedResident
+      ? residentProfiles[
+          selectedResident
+        ]
+      : null;
+
+  const activeRuntime =
+    activeProfile
+      ? runtime[
+          activeProfile.id
+        ]
+      : null;
+
+  /* ========================================
+     DIALOGUE TEXT
+  ======================================== */
+
+  const beanDialogue =
+    getResidentDialogue(
+      "bean",
+      runtime.bean.status
+    );
+
+  const pamaDialogue =
+    getResidentDialogue(
+      "pama",
+      runtime.pama.status
+    );
+
+  const hoduDialogue =
+    getResidentDialogue(
+      "hodu",
+      hoduDisplayStatus
+    );
 
   /* ========================================
      RENDER
@@ -872,9 +1649,9 @@ export default function BeanlogWorld() {
         .filter(Boolean)
         .join(" ")}
     >
-      {/* ========================================
+      {/* ====================================
           DATA SPACE
-      ======================================== */}
+      ==================================== */}
 
       <div
         className={[
@@ -898,11 +1675,13 @@ export default function BeanlogWorld() {
             const isEscaping =
               bootComplete &&
               hoduHovered &&
+              runtime.hodu.visible &&
               escape.active;
 
             const isTarget =
               bootComplete &&
               hoduHovered &&
+              runtime.hodu.visible &&
               hoduTargetId ===
                 item.id;
 
@@ -972,14 +1751,17 @@ export default function BeanlogWorld() {
         <div className="node node-3" />
       </div>
 
-      {/* ========================================
+      {/* ====================================
           TERMINAL
-      ======================================== */}
+      ==================================== */}
 
       <section
         className="terminal-panel"
         onClick={() => {
-          if (bootComplete) {
+          if (
+            bootComplete &&
+            !selectedResident
+          ) {
             terminalInputRef.current?.focus();
           }
         }}
@@ -1001,12 +1783,11 @@ export default function BeanlogWorld() {
             ref={terminalScrollRef}
             className="terminal-output boot-output"
           >
-            {/* ====================================
-                BOOT HISTORY
-            ==================================== */}
-
             {typedLines.map(
-              (line, index) => {
+              (
+                line,
+                index
+              ) => {
                 const isCommand =
                   index === 0;
 
@@ -1052,10 +1833,6 @@ export default function BeanlogWorld() {
               }
             )}
 
-            {/* ====================================
-                BOOT CURRENT LINE
-            ==================================== */}
-
             {!bootComplete ? (
               <p
                 className={
@@ -1077,10 +1854,6 @@ export default function BeanlogWorld() {
                 <i className="terminal-cursor" />
               </p>
             ) : null}
-
-            {/* ====================================
-                USER COMMAND HISTORY
-            ==================================== */}
 
             {bootComplete &&
               terminalHistory.map(
@@ -1104,7 +1877,8 @@ export default function BeanlogWorld() {
                   }
 
                   if (
-                    item.text === ">"
+                    item.text ===
+                    ">"
                   ) {
                     return (
                       <div
@@ -1125,10 +1899,6 @@ export default function BeanlogWorld() {
                 }
               )}
 
-            {/* ====================================
-                REAL TERMINAL INPUT
-            ==================================== */}
-
             {bootComplete ? (
               <form
                 className="terminal-input-row"
@@ -1141,19 +1911,13 @@ export default function BeanlogWorld() {
                 </span>
 
                 <input
-                  ref={
-                    terminalInputRef
-                  }
+                  ref={terminalInputRef}
                   className="terminal-input"
-                  value={
-                    terminalInput
-                  }
-                  onChange={
-                    (event) => {
-                      setTerminalInput(
-                        event.target.value
-                      );
-                    }
+                  value={terminalInput}
+                  onChange={(event) =>
+                    setTerminalInput(
+                      event.target.value
+                    )
                   }
                   autoComplete="off"
                   autoCorrect="off"
@@ -1167,9 +1931,9 @@ export default function BeanlogWorld() {
         </div>
       </section>
 
-      {/* ========================================
+      {/* ====================================
           SYSTEM HUD
-      ======================================== */}
+      ==================================== */}
 
       <aside className="system-hud">
         <div className="hud-header">
@@ -1201,7 +1965,7 @@ export default function BeanlogWorld() {
             </strong>
 
             <em>
-              ACTIVE
+              {runtime.bean.status}
             </em>
           </div>
 
@@ -1213,7 +1977,7 @@ export default function BeanlogWorld() {
             </strong>
 
             <em>
-              IDLE
+              {runtime.pama.status}
             </em>
           </div>
 
@@ -1225,17 +1989,15 @@ export default function BeanlogWorld() {
             </strong>
 
             <em>
-              {hoduHovered
-                ? "CHASING"
-                : "???"}
+              {hoduDisplayStatus}
             </em>
           </div>
         </div>
       </aside>
 
-      {/* ========================================
+      {/* ====================================
           RESIDENTS
-      ======================================== */}
+      ==================================== */}
 
       <section className="residents">
         {/* PAMA */}
@@ -1248,14 +2010,46 @@ export default function BeanlogWorld() {
             pamaReady
               ? "is-visible"
               : "",
+
+            !runtime.pama.visible
+              ? "is-away"
+              : "",
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          <div className="speech-bubble speech-pama">
-            또 저러고 있네...
-            <br />
-            하아...
+          <div
+            className={[
+              "speech-bubble",
+              "speech-pama",
+
+              visibleDialogue.pama &&
+              runtime.pama.visible
+                ? "is-speaking"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {pamaDialogue
+              .split("\n")
+              .map(
+                (
+                  line,
+                  index,
+                  lines
+                ) => (
+                  <span key={index}>
+                    {line}
+
+                    {index <
+                    lines.length -
+                      1 ? (
+                      <br />
+                    ) : null}
+                  </span>
+                )
+              )}
           </div>
 
           <div className="resident-visual">
@@ -1279,12 +2073,28 @@ export default function BeanlogWorld() {
             beanReady
               ? "is-visible"
               : "",
+
+            !runtime.bean.visible
+              ? "is-away"
+              : "",
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          <div className="speech-bubble speech-bean">
-            집중 중...
+          <div
+            className={[
+              "speech-bubble",
+              "speech-bean",
+
+              visibleDialogue.bean &&
+              runtime.bean.visible
+                ? "is-speaking"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {beanDialogue}
           </div>
 
           <div className="resident-visual">
@@ -1309,23 +2119,53 @@ export default function BeanlogWorld() {
               ? "is-visible"
               : "",
 
-            hoduHovered
+            !runtime.hodu.visible
+              ? "is-away"
+              : "",
+
+            hoduHovered &&
+            runtime.hodu.visible
               ? "is-chasing"
               : "",
           ]
             .filter(Boolean)
             .join(" ")}
-          onMouseEnter={
-            engageHodu
-          }
-          onMouseLeave={
-            disengageHodu
-          }
+          onMouseEnter={engageHodu}
+          onMouseLeave={disengageHodu}
         >
-          <div className="speech-bubble speech-hodu">
-            저거 잡으면
-            <br />
-            재밌겠다!
+          <div
+            className={[
+              "speech-bubble",
+              "speech-hodu",
+
+              (visibleDialogue.hodu ||
+                hoduHovered) &&
+              runtime.hodu.visible
+                ? "is-speaking"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {hoduDialogue
+              .split("\n")
+              .map(
+                (
+                  line,
+                  index,
+                  lines
+                ) => (
+                  <span key={index}>
+                    {line}
+
+                    {index <
+                    lines.length -
+                      1 ? (
+                      <br />
+                    ) : null}
+                  </span>
+                )
+              )}
           </div>
 
           <div className="resident-visual">
@@ -1339,6 +2179,239 @@ export default function BeanlogWorld() {
           </div>
         </div>
       </section>
+
+      {/* ====================================
+          RESIDENT CARDS
+      ==================================== */}
+
+      <nav
+        className="resident-cards"
+        aria-label="Beanlog residents"
+      >
+        {(
+          [
+            "bean",
+            "pama",
+            "hodu",
+          ] as ResidentId[]
+        ).map((id) => {
+          const profile =
+            residentProfiles[id];
+
+          const state =
+            runtime[id];
+
+          const status =
+            id === "hodu"
+              ? hoduDisplayStatus
+              : state.status;
+
+          return (
+            <button
+              key={id}
+              type="button"
+              className={[
+                "resident-card",
+
+                `resident-card-${id}`,
+
+                !state.visible
+                  ? "is-away"
+                  : "",
+
+                selectedResident ===
+                id
+                  ? "is-selected"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() =>
+                setSelectedResident(
+                  id
+                )
+              }
+            >
+              <span className="resident-card-number">
+                {profile.number}
+              </span>
+
+              <span className="resident-card-main">
+                <strong>
+                  {profile.name}
+                </strong>
+
+                <small>
+                  {state.message}
+                </small>
+              </span>
+
+              <span className="resident-card-status">
+                {status}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* ====================================
+          PROFILE
+      ==================================== */}
+
+      {activeProfile &&
+      activeRuntime ? (
+        <div
+          className="resident-profile-layer"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              setSelectedResident(
+                null
+              );
+            }
+          }}
+        >
+          <section
+            className="resident-profile"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resident-profile-title"
+          >
+            <div className="resident-profile-bar">
+              <span>
+                RESIDENT.PROFILE
+              </span>
+
+              <button
+                type="button"
+                className="resident-profile-close"
+                onClick={() =>
+                  setSelectedResident(
+                    null
+                  )
+                }
+                aria-label="Close resident profile"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="resident-profile-body">
+              <header className="resident-profile-heading">
+                <div>
+                  <span className="resident-profile-index">
+                    RESIDENT{" "}
+                    {activeProfile.number}
+                  </span>
+
+                  <h2 id="resident-profile-title">
+                    {activeProfile.name}
+                  </h2>
+                </div>
+
+                <span className="resident-profile-status">
+                  ●{" "}
+                  {activeProfile.id ===
+                  "hodu"
+                    ? hoduDisplayStatus
+                    : activeRuntime.status}
+                </span>
+              </header>
+
+              <div className="resident-profile-meta">
+                <span>
+                  {activeProfile.type}
+                </span>
+
+                {activeProfile.age ? (
+                  <span>
+                    {activeProfile.age}
+                  </span>
+                ) : null}
+              </div>
+
+              <p className="resident-profile-tagline">
+                {activeProfile.tagline}
+              </p>
+
+              <div className="resident-profile-current">
+                <span className="resident-profile-label">
+                  CURRENT
+                </span>
+
+                <p>
+                  {activeRuntime.message}
+                </p>
+              </div>
+
+              <div className="resident-profile-grid">
+                <section>
+                  <span className="resident-profile-label">
+                    TRAITS
+                  </span>
+
+                  <ul>
+                    {activeProfile.traits.map(
+                      (trait) => (
+                        <li key={trait}>
+                          {trait}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </section>
+
+                <section>
+                  <span className="resident-profile-label">
+                    FAVORITES
+                  </span>
+
+                  <ul>
+                    {activeProfile.favorites.map(
+                      (favorite) => (
+                        <li
+                          key={
+                            favorite
+                          }
+                        >
+                          {favorite}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </section>
+              </div>
+
+              <div className="resident-profile-note">
+                <span className="resident-profile-label">
+                  NOTE
+                </span>
+
+                <p>
+                  {activeProfile.note}
+                </p>
+              </div>
+
+              <footer className="resident-profile-footer">
+                <span>
+                  BEANLOG.SYSTEM
+                </span>
+
+                <span>
+                  {kstTime.label} KST
+                </span>
+
+                <span>
+                  ESC TO CLOSE
+                </span>
+              </footer>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
