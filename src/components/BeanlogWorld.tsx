@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
+
 import Image from "next/image";
 
 /* ========================================
@@ -19,6 +26,16 @@ const bootLines = [
   "> all residents online.",
   "> welcome to beanlog.site!",
 ];
+
+/* ========================================
+   TERMINAL
+======================================== */
+
+type TerminalHistoryItem = {
+  id: number;
+  type: "command" | "output";
+  text: string;
+};
 
 /* ========================================
    FLOATING DATA
@@ -95,9 +112,6 @@ function generateDataText() {
 
 /* ========================================
    RESIDENT POSITIONS
-
-   캐릭터가 작아지고 위치가 바뀌었으므로
-   opacity 계산용 중심 좌표도 조정.
 ======================================== */
 
 const residentCenters = [
@@ -275,26 +289,11 @@ function createFloatingData(
             y
           ),
 
-        /*
-          이전보다 훨씬 느리게.
-        */
-
         duration:
           random(24, 52),
 
-        /*
-          이미 공간에 떠 있던 것처럼
-          서로 다른 시점에서 시작.
-        */
-
         delay:
           random(-50, 0),
-
-        /*
-          이동 거리는 조금 넓게.
-          대신 속도가 느려서
-          길게 흘러가는 느낌.
-        */
 
         driftX:
           random(-58, 58),
@@ -359,6 +358,29 @@ export default function BeanlogWorld() {
   ] = useState(false);
 
   /* ========================================
+     TERMINAL STATE
+  ======================================== */
+
+  const [
+    terminalInput,
+    setTerminalInput,
+  ] = useState("");
+
+  const [
+    terminalHistory,
+    setTerminalHistory,
+  ] = useState<TerminalHistoryItem[]>([]);
+
+  const terminalInputRef =
+    useRef<HTMLInputElement>(null);
+
+  const terminalScrollRef =
+    useRef<HTMLDivElement>(null);
+
+  const terminalHistoryId =
+    useRef(0);
+
+  /* ========================================
      HODU INTERACTION
   ======================================== */
 
@@ -366,6 +388,11 @@ export default function BeanlogWorld() {
     hoduHovered,
     setHoduHovered,
   ] = useState(false);
+
+  const [
+    hoduTargetId,
+    setHoduTargetId,
+  ] = useState<number | null>(null);
 
   /* ========================================
      RANDOM DATA
@@ -381,6 +408,291 @@ export default function BeanlogWorld() {
       createFloatingData(34)
     );
   }, []);
+
+  /* ========================================
+     TERMINAL AUTO FOCUS
+  ======================================== */
+
+  useEffect(() => {
+    if (!bootComplete) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      terminalInputRef.current?.focus();
+    }, 250);
+
+    return () =>
+      clearTimeout(timer);
+  }, [bootComplete]);
+
+  /* ========================================
+     TERMINAL AUTO SCROLL
+  ======================================== */
+
+  useEffect(() => {
+    if (!bootComplete) {
+      return;
+    }
+
+    const element =
+      terminalScrollRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    element.scrollTo({
+      top: element.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [
+    terminalHistory,
+    bootComplete,
+  ]);
+
+  /* ========================================
+     HODU TARGET / CHASE
+  ======================================== */
+
+  function engageHodu() {
+    if (!bootComplete) {
+      return;
+    }
+
+    setHoduHovered(true);
+
+    const nearbyData =
+      floatingData.filter(
+        (item) => {
+          const d = distance(
+            item.x,
+            item.y,
+            HODU_CENTER.x,
+            HODU_CENTER.y
+          );
+
+          return (
+            d <=
+            HODU_REACTION_RADIUS
+          );
+        }
+      );
+
+    if (
+      nearbyData.length === 0
+    ) {
+      setHoduTargetId(null);
+
+      return;
+    }
+
+    const target =
+      nearbyData[
+        Math.floor(
+          Math.random() *
+            nearbyData.length
+        )
+      ];
+
+    setHoduTargetId(
+      target.id
+    );
+  }
+
+  function disengageHodu() {
+    setHoduHovered(false);
+
+    setHoduTargetId(null);
+  }
+
+  /* ========================================
+     TERMINAL HISTORY HELPERS
+  ======================================== */
+
+  function createHistoryItem(
+    type: TerminalHistoryItem["type"],
+    text: string
+  ): TerminalHistoryItem {
+    terminalHistoryId.current += 1;
+
+    return {
+      id: terminalHistoryId.current,
+      type,
+      text,
+    };
+  }
+
+  function addTerminalOutput(
+    lines: string[]
+  ) {
+    const outputItems =
+      lines.map(
+        (line) =>
+          createHistoryItem(
+            "output",
+            line
+          )
+      );
+
+    setTerminalHistory(
+      (prev) => [
+        ...prev,
+        ...outputItems,
+      ]
+    );
+  }
+
+  /* ========================================
+     TERMINAL COMMANDS
+  ======================================== */
+
+  function executeCommand(
+    rawCommand: string
+  ) {
+    const original =
+      rawCommand.trim();
+
+    const command =
+      original.toLowerCase();
+
+    if (!command) {
+      return;
+    }
+
+    /*
+      clear는 실행된 명령 자체도
+      화면에 남기지 않고 history를 정리.
+    */
+
+    if (command === "clear") {
+      setTerminalHistory([]);
+
+      return;
+    }
+
+    const commandItem =
+      createHistoryItem(
+        "command",
+        original
+      );
+
+    setTerminalHistory(
+      (prev) => [
+        ...prev,
+        commandItem,
+      ]
+    );
+
+    /* HELP */
+
+    if (command === "help") {
+      addTerminalOutput([
+        "> available commands:",
+        ">",
+        "> help",
+        "> residents",
+        "> about",
+        "> status",
+        "> clear",
+        "> goto bitandink",
+      ]);
+
+      return;
+    }
+
+    /* RESIDENTS */
+
+    if (command === "residents") {
+      addTerminalOutput([
+        "> resident registry:",
+        ">",
+        "> 01  BEAN  .... ACTIVE",
+        "> 02  PAMA  .... IDLE",
+        "> 03  HODU  .... ???",
+      ]);
+
+      return;
+    }
+
+    /* ABOUT */
+
+    if (command === "about") {
+      addTerminalOutput([
+        "> beanlog.site",
+        ">",
+        "> a small virtual data space",
+        "> inhabited by three residents.",
+        ">",
+        "> BEAN / PAMA / HODU",
+      ]);
+
+      return;
+    }
+
+    /* STATUS */
+
+    if (command === "status") {
+      addTerminalOutput([
+        "> BEANLOG.SYSTEM",
+        ">",
+        "> environment .... ONLINE",
+        "> residents ...... 03",
+        "> data stream .... STABLE",
+        "> terminal ....... READY",
+      ]);
+
+      return;
+    }
+
+    /* BITANDINK */
+
+    if (
+      command ===
+        "goto bitandink" ||
+      command ===
+        "goto bitandink.site"
+    ) {
+      addTerminalOutput([
+        "> locating bitandink...",
+        "> destination is not connected yet.",
+      ]);
+
+      return;
+    }
+
+    /* UNKNOWN */
+
+    addTerminalOutput([
+      `> command not found: ${command}`,
+      "> type 'help' for available commands.",
+    ]);
+  }
+
+  /* ========================================
+     TERMINAL SUBMIT
+  ======================================== */
+
+  function handleTerminalSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    const command =
+      terminalInput.trim();
+
+    if (!command) {
+      return;
+    }
+
+    executeCommand(command);
+
+    setTerminalInput("");
+
+    requestAnimationFrame(() => {
+      terminalInputRef.current?.focus();
+    });
+  }
 
   /* ========================================
      TERMINAL BOOT
@@ -588,6 +900,12 @@ export default function BeanlogWorld() {
               hoduHovered &&
               escape.active;
 
+            const isTarget =
+              bootComplete &&
+              hoduHovered &&
+              hoduTargetId ===
+                item.id;
+
             return (
               <span
                 key={item.id}
@@ -596,6 +914,10 @@ export default function BeanlogWorld() {
 
                   isEscaping
                     ? "is-escaping"
+                    : "",
+
+                  isTarget
+                    ? "is-hodu-target"
                     : "",
                 ]
                   .filter(Boolean)
@@ -654,7 +976,14 @@ export default function BeanlogWorld() {
           TERMINAL
       ======================================== */}
 
-      <section className="terminal-panel">
+      <section
+        className="terminal-panel"
+        onClick={() => {
+          if (bootComplete) {
+            terminalInputRef.current?.focus();
+          }
+        }}
+      >
         <div className="terminal-bar">
           <div className="terminal-dots">
             <span />
@@ -668,7 +997,14 @@ export default function BeanlogWorld() {
         </div>
 
         <div className="terminal-body">
-          <div className="terminal-output boot-output">
+          <div
+            ref={terminalScrollRef}
+            className="terminal-output boot-output"
+          >
+            {/* ====================================
+                BOOT HISTORY
+            ==================================== */}
+
             {typedLines.map(
               (line, index) => {
                 const isCommand =
@@ -716,15 +1052,21 @@ export default function BeanlogWorld() {
               }
             )}
 
+            {/* ====================================
+                BOOT CURRENT LINE
+            ==================================== */}
+
             {!bootComplete ? (
               <p
                 className={
-                  typedLines.length === 0
+                  typedLines.length ===
+                  0
                     ? "terminal-command"
                     : ""
                 }
               >
-                {typedLines.length === 0 ? (
+                {typedLines.length ===
+                0 ? (
                   <span>
                     bean@beanlog:~$
                   </span>
@@ -736,14 +1078,90 @@ export default function BeanlogWorld() {
               </p>
             ) : null}
 
+            {/* ====================================
+                USER COMMAND HISTORY
+            ==================================== */}
+
+            {bootComplete &&
+              terminalHistory.map(
+                (item) => {
+                  if (
+                    item.type ===
+                    "command"
+                  ) {
+                    return (
+                      <p
+                        key={item.id}
+                        className="terminal-command terminal-history-command"
+                      >
+                        <span>
+                          bean@beanlog:~$
+                        </span>
+
+                        {item.text}
+                      </p>
+                    );
+                  }
+
+                  if (
+                    item.text === ">"
+                  ) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="terminal-history-spacer"
+                      />
+                    );
+                  }
+
+                  return (
+                    <p
+                      key={item.id}
+                      className="terminal-history-output"
+                    >
+                      {item.text}
+                    </p>
+                  );
+                }
+              )}
+
+            {/* ====================================
+                REAL TERMINAL INPUT
+            ==================================== */}
+
             {bootComplete ? (
-              <p className="terminal-command terminal-ready">
-                <span>
+              <form
+                className="terminal-input-row"
+                onSubmit={
+                  handleTerminalSubmit
+                }
+              >
+                <span className="terminal-prompt">
                   bean@beanlog:~$
                 </span>
 
-                <i className="terminal-cursor" />
-              </p>
+                <input
+                  ref={
+                    terminalInputRef
+                  }
+                  className="terminal-input"
+                  value={
+                    terminalInput
+                  }
+                  onChange={
+                    (event) => {
+                      setTerminalInput(
+                        event.target.value
+                      );
+                    }
+                  }
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  aria-label="Beanlog terminal command"
+                />
+              </form>
             ) : null}
           </div>
         </div>
@@ -897,18 +1315,12 @@ export default function BeanlogWorld() {
           ]
             .filter(Boolean)
             .join(" ")}
-          onMouseEnter={() => {
-            if (bootComplete) {
-              setHoduHovered(
-                true
-              );
-            }
-          }}
-          onMouseLeave={() => {
-            setHoduHovered(
-              false
-            );
-          }}
+          onMouseEnter={
+            engageHodu
+          }
+          onMouseLeave={
+            disengageHodu
+          }
         >
           <div className="speech-bubble speech-hodu">
             저거 잡으면

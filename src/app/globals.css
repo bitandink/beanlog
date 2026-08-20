@@ -99,7 +99,8 @@ body {
 
   opacity: 0;
 
-  transition: opacity 1000ms ease;
+  transition:
+    opacity 1000ms ease;
 
   pointer-events: none;
 }
@@ -111,8 +112,6 @@ body {
 
 /* ========================================
    FLOATING DATA SHELL
-
-   위치 + HODU 회피 이동 담당
 ======================================== */
 
 .floating-data-shell {
@@ -124,7 +123,12 @@ body {
   transition:
     transform
     650ms
-    cubic-bezier(0.22, 1, 0.36, 1);
+    cubic-bezier(
+      0.22,
+      1,
+      0.36,
+      1
+    );
 
   will-change: transform;
 }
@@ -146,8 +150,6 @@ body {
 
 /* ========================================
    FLOATING DATA
-
-   실제 부유 애니메이션 담당
 ======================================== */
 
 .floating-data {
@@ -169,7 +171,8 @@ body {
     0 0 10px
     rgba(87, 255, 166, 0.12);
 
-  opacity: var(--data-opacity);
+  opacity:
+    var(--data-opacity);
 
   animation:
     data-float
@@ -201,18 +204,84 @@ body {
     0 0 22px
       rgba(87, 255, 166, 0.07);
 
-  filter: brightness(1.12);
+  filter:
+    brightness(1.12);
 }
 
 
 /* ========================================
-   DATA FLOAT ANIMATION
+   HODU TARGET DATA
+======================================== */
+
+.floating-data-shell.is-hodu-target
+.floating-data {
+  color:
+    rgba(
+      122,
+      255,
+      184,
+      1
+    );
+
+  text-shadow:
+    0 0 7px
+      rgba(
+        82,
+        255,
+        159,
+        0.75
+      ),
+    0 0 18px
+      rgba(
+        82,
+        255,
+        159,
+        0.32
+      );
+
+  filter:
+    brightness(1.35);
+
+  animation:
+    data-float
+      var(--duration)
+      ease-in-out
+      var(--delay)
+      infinite
+      alternate,
+
+    hodu-target-pulse
+      700ms
+      ease-in-out
+      infinite;
+}
+
+
+@keyframes hodu-target-pulse {
+  0%,
+  100% {
+    opacity:
+      var(--data-opacity);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+
+/* ========================================
+   DATA FLOAT
 ======================================== */
 
 @keyframes data-float {
   0% {
     transform:
-      translate3d(0, 0, 0)
+      translate3d(
+        0,
+        0,
+        0
+      )
       rotate(
         calc(
           var(--rotation) * -0.5
@@ -354,16 +423,21 @@ body {
   animation-delay: -2.1s;
 }
 
+
 @keyframes node-pulse {
   0%,
   100% {
     opacity: 0.25;
-    transform: scale(0.85);
+
+    transform:
+      scale(0.85);
   }
 
   50% {
     opacity: 0.7;
-    transform: scale(1.2);
+
+    transform:
+      scale(1.2);
   }
 }
 
@@ -406,9 +480,7 @@ body {
 
 
 /* ========================================
-   RESIDENT VISUAL WRAPPER
-
-   hover / interaction 담당
+   RESIDENT VISUAL
 ======================================== */
 
 .resident-visual {
@@ -427,14 +499,13 @@ body {
       ),
     filter 320ms ease;
 
-  will-change: transform;
+  will-change:
+    transform;
 }
 
 
 /* ========================================
    RESIDENT IMAGE
-
-   각 캐릭터 자체 animation 담당
 ======================================== */
 
 .resident img {
@@ -446,15 +517,21 @@ body {
   filter:
     drop-shadow(
       0 18px 26px
-      rgba(0, 0, 0, 0.42)
+      rgba(
+        0,
+        0,
+        0,
+        0.42
+      )
     );
 
-  will-change: transform;
+  will-change:
+    transform;
 }
 
 
 /* ========================================
-   GENERIC RESIDENT HOVER
+   RESIDENT HOVER
 ======================================== */
 
 .beanlog-world.boot-complete
@@ -483,7 +560,7 @@ body {
 
 
 /* ========================================
-   PAMA BREATHING / FLOATING
+   PAMA BREATH
 ======================================== */
 
 .beanlog-world.boot-complete
@@ -499,13 +576,6 @@ body {
     50% 78%;
 }
 
-
-/*
-  대부분은 그냥 둥실둥실.
-
-  한 사이클 중 한 번만
-  살짝 푹 꺼지면서 한숨.
-*/
 
 @keyframes pama-breathe {
   0%,
@@ -559,8 +629,6 @@ body {
       rotate(-0.1deg);
   }
 
-  /* 한숨 직전 */
-
   68% {
     transform:
       translate3d(
@@ -571,11 +639,8 @@ body {
       scale(
         1.006,
         1.012
-      )
-      rotate(0deg);
+      );
   }
-
-  /* 하아... */
 
   73% {
     transform:
@@ -605,7 +670,7 @@ body {
 
 
 /* ========================================
-   PAMA SIGH TEXT
+   PAMA SIGH
 ======================================== */
 
 .resident-pama
@@ -662,10 +727,6 @@ body {
 }
 
 
-/* ========================================
-   PAMA SIGH TEXT ANIMATION
-======================================== */
-
 @keyframes pama-sigh-text {
   0%,
   64% {
@@ -681,14 +742,6 @@ body {
 
   69% {
     opacity: 0;
-
-    color:
-      rgba(
-        203,
-        213,
-        225,
-        0
-      );
   }
 
   73% {
@@ -759,7 +812,7 @@ body {
 
 
 /* ========================================
-   BEAN FLOAT / SUBTLE ACTIVITY
+   BEAN FLOAT / ACTIVITY
 ======================================== */
 
 .beanlog-world.boot-complete
@@ -808,11 +861,6 @@ body {
       rotate(0.1deg);
   }
 
-  /*
-    아주 살짝 작업 쪽으로
-    몸이 기울어지는 느낌
-  */
-
   44% {
     transform:
       translate3d(
@@ -848,9 +896,6 @@ body {
 
 /* ========================================
    BEAN WORK GLOW
-
-   노트북/작업 공간에서
-   은은하게 빛이 나는 느낌
 ======================================== */
 
 .resident-bean
@@ -880,7 +925,6 @@ body {
         0.14
       )
       0%,
-
       rgba(
         82,
         255,
@@ -888,9 +932,7 @@ body {
         0.06
       )
       38%,
-
-      transparent
-      72%
+      transparent 72%
     );
 
   filter:
@@ -908,10 +950,6 @@ body {
     infinite;
 }
 
-
-/* ========================================
-   BEAN WORK GLOW ANIMATION
-======================================== */
 
 @keyframes bean-work-glow {
   0%,
@@ -1027,22 +1065,35 @@ body {
 .resident-visual {
   transform:
     translate(
-      -7px,
-      -8px
+      -11px,
+      -10px
     )
-    rotate(1.4deg)
-    scale(1.025);
+    rotate(2deg)
+    scale(1.035);
 
   filter:
     drop-shadow(
-      0 0 14px
+      0 0 18px
       rgba(
         82,
         255,
         159,
-        0.07
+        0.1
       )
     );
+
+  transition:
+    transform
+      280ms
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+    filter
+      280ms
+      ease;
 }
 
 
@@ -1103,7 +1154,6 @@ body {
         0,
         0.32
       ),
-
     inset
       0 1px 0
       rgba(
@@ -1125,7 +1175,6 @@ body {
         0.36,
         1
       ),
-
     left
       900ms
       cubic-bezier(
@@ -1134,7 +1183,6 @@ body {
         0.36,
         1
       ),
-
     transform
       900ms
       cubic-bezier(
@@ -1143,6 +1191,13 @@ body {
         0.36,
         1
       );
+
+  cursor: default;
+}
+
+.beanlog-world.boot-complete
+.terminal-panel {
+  cursor: text;
 }
 
 
@@ -1176,7 +1231,7 @@ body {
 
 
 /* ========================================
-   TERMINAL TOP BAR
+   TERMINAL BAR
 ======================================== */
 
 .terminal-bar {
@@ -1188,7 +1243,8 @@ body {
   justify-content:
     space-between;
 
-  padding: 0 14px;
+  padding:
+    0 14px;
 
   border-bottom:
     1px solid
@@ -1210,7 +1266,6 @@ body {
 
 .terminal-dots {
   display: flex;
-
   gap: 6px;
 }
 
@@ -1279,8 +1334,58 @@ body {
   margin: 0;
 }
 
+
+/* ========================================
+   TERMINAL OUTPUT
+======================================== */
+
 .terminal-output {
   min-height: 220px;
+}
+
+.beanlog-world.boot-complete
+.terminal-output {
+  max-height: 360px;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  padding-right: 5px;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    rgba(
+      82,
+      255,
+      159,
+      0.16
+    )
+    transparent;
+}
+
+.beanlog-world.boot-complete
+.terminal-output::-webkit-scrollbar {
+  width: 4px;
+}
+
+.beanlog-world.boot-complete
+.terminal-output::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.beanlog-world.boot-complete
+.terminal-output::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    rgba(
+      82,
+      255,
+      159,
+      0.16
+    );
 }
 
 .terminal-output p {
@@ -1292,6 +1397,11 @@ body {
       0.6
     );
 }
+
+
+/* ========================================
+   TERMINAL COMMAND
+======================================== */
 
 .terminal-command {
   color:
@@ -1343,6 +1453,119 @@ body {
 
 
 /* ========================================
+   TERMINAL HISTORY
+======================================== */
+
+.terminal-history-command {
+  margin-top:
+    12px
+    !important;
+}
+
+.terminal-history-output {
+  color:
+    rgba(
+      148,
+      163,
+      184,
+      0.68
+    )
+    !important;
+}
+
+.terminal-history-spacer {
+  height: 7px;
+}
+
+
+/* ========================================
+   INTERACTIVE TERMINAL INPUT
+======================================== */
+
+.terminal-input-row {
+  display: flex;
+
+  align-items: center;
+
+  width: 100%;
+
+  margin-top: 14px;
+}
+
+.terminal-prompt {
+  flex: 0 0 auto;
+
+  margin-right: 8px;
+
+  color:
+    rgba(
+      82,
+      255,
+      159,
+      0.9
+    );
+
+  user-select: none;
+}
+
+.terminal-input {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+
+  outline: 0;
+
+  background: transparent;
+
+  color:
+    rgba(
+      226,
+      232,
+      240,
+      0.82
+    );
+
+  caret-color:
+    rgba(
+      82,
+      255,
+      159,
+      0.96
+    );
+
+  font:
+    inherit;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 12px;
+
+  line-height: 1.8;
+
+  appearance: none;
+}
+
+.terminal-input::selection {
+  background:
+    rgba(
+      82,
+      255,
+      159,
+      0.18
+    );
+}
+
+
+/* ========================================
    TERMINAL CURSOR
 ======================================== */
 
@@ -1370,6 +1593,7 @@ body {
     steps(1)
     infinite;
 }
+
 
 @keyframes cursor-blink {
   0%,
@@ -1444,7 +1668,6 @@ body {
         0,
         0.18
       ),
-
     inset
       0 1px 0
       rgba(
@@ -1499,7 +1722,6 @@ body {
     space-between;
 
   padding-bottom: 9px;
-
   margin-bottom: 10px;
 
   border-bottom:
@@ -1546,7 +1768,6 @@ body {
   display: flex;
 
   align-items: baseline;
-
   justify-content:
     space-between;
 
@@ -1590,7 +1811,6 @@ body {
 
 .hud-residents {
   display: grid;
-
   gap: 6px;
 }
 
@@ -1656,7 +1876,7 @@ body {
 }
 
 
-/* HODU chasing HUD */
+/* HODU STATUS */
 
 .beanlog-world.hodu-engaged
 .hud-residents
@@ -1721,7 +1941,6 @@ em {
         0,
         0.4
       ),
-
     inset
       0 1px 0
       rgba(
@@ -1823,7 +2042,6 @@ em {
 .resident:hover
 .speech-bubble {
   opacity: 1;
-
   visibility: visible;
 }
 
@@ -1893,7 +2111,6 @@ em {
 
 .speech-bean::after {
   left: 50%;
-
   margin-left: -4px;
 }
 
