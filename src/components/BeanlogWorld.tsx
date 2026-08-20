@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 /* ========================================
    BOOT SEQUENCE
@@ -697,6 +698,8 @@ function createFloatingData(
 ======================================== */
 
 export default function BeanlogWorld() {
+  const router = useRouter();
+
   /* ========================================
      BOOT
   ======================================== */
@@ -1425,9 +1428,24 @@ export default function BeanlogWorld() {
       command === "goto bitandink.site"
     ) {
       addTerminalOutput([
-        "> locating bitandink...",
-        "> destination is not connected yet.",
+        "> leaving Beanlog...",
       ]);
+
+      window.setTimeout(() => {
+        addTerminalOutput([
+          "> crossing world boundary...",
+        ]);
+      }, 450);
+
+      window.setTimeout(() => {
+        addTerminalOutput([
+          "> connection established.",
+        ]);
+      }, 900);
+
+      window.setTimeout(() => {
+        router.push("/bitandink");
+      }, 1350);
 
       return;
     }
