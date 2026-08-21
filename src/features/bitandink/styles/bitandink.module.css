@@ -453,7 +453,7 @@
     238px minmax(0, 1fr);
 
   grid-template-rows:
-    minmax(0, 1fr) 28px;
+    minmax(0, 1fr) 38px;
 
   opacity:
     var(--workspace-opacity);
@@ -643,14 +643,14 @@
     rgba(236,
       234,
       229,
-      0.38);
+      0.22);
 
   font-family:
     "SFMono-Regular",
     Consolas,
     monospace;
 
-  font-size: 10px;
+  font-size: 9px;
 
   letter-spacing:
     0.16em;
@@ -795,6 +795,7 @@
   min-width: 0;
 
   overflow-y: auto;
+  overscroll-behavior-y: contain;
 
   background:
     #111214;
@@ -858,14 +859,14 @@
     rgba(236,
       234,
       229,
-      0.42);
+      0.27);
 
   font-family:
     "SFMono-Regular",
     Consolas,
     monospace;
 
-  font-size: 10px;
+  font-size: 8px;
 
   letter-spacing:
     0.04em;
@@ -884,7 +885,7 @@
     rgba(236,
       234,
       229,
-      0.68);
+      0.54);
 
   font-weight: 400;
 }
@@ -985,7 +986,7 @@
     rgba(236,
       234,
       229,
-      0.25);
+      0.4);
 
   font-family:
     "SFMono-Regular",
@@ -1023,14 +1024,14 @@
 .documentHeading p {
   margin: 34px 0 0;
 
-  color: rgba(236, 234, 229, 0.62);
+  color: rgba(236, 234, 229, 0.5);
 
   font-family:
     "SFMono-Regular",
     Consolas,
     monospace;
 
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.8;
 }
 
@@ -1206,7 +1207,7 @@
 
 
 .obsessionMeta span {
-  color: rgba(236, 234, 229, 0.4);
+  color: rgba(236, 234, 229, 0.32);
 
   font-family:
     "SFMono-Regular",
@@ -1214,7 +1215,7 @@
     "Liberation Mono",
     monospace;
 
-  font-size: 10px;
+  font-size: 9px;
 
   letter-spacing: 0.05em;
 }
@@ -1238,8 +1239,12 @@
   justify-content:
     space-between;
 
+  box-sizing: border-box;
+
+  min-width: 0;
+
   padding:
-    0 13px;
+    0 28px 0 13px;
 
   border-top:
     1px solid rgba(255,
@@ -1274,7 +1279,96 @@
   align-items:
     center;
 
+  min-width: 0;
+
   gap: 15px;
+}
+
+.workspaceStatusbar div:last-child {
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+
+.returnToHero {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 28px;
+
+  padding:
+    0 10px 0 16px;
+
+  border: 0;
+  border-left:
+    1px solid
+    rgba(236,
+      234,
+      229,
+      0.16);
+
+  background: transparent;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.78);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  line-height: 1;
+
+  letter-spacing:
+    0.035em;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    color 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.returnToHero:hover,
+.returnToHero:focus-visible {
+  color:
+    rgba(236,
+      234,
+      229,
+      0.98);
+
+  border-left-color:
+    rgba(236,
+      234,
+      229,
+      0.34);
+
+  background:
+    rgba(255,
+      255,
+      255,
+      0.025);
+}
+
+.returnToHero:focus-visible {
+  outline:
+    1px solid
+    rgba(236,
+      234,
+      229,
+      0.24);
+
+  outline-offset: 3px;
 }
 
 
@@ -1406,7 +1500,7 @@
       1fr;
 
     grid-template-rows:
-      minmax(0, 1fr) 26px;
+      minmax(0, 1fr) 36px;
   }
 
 
@@ -1525,6 +1619,19 @@
   .workspaceStatusbar div:last-child span:first-child {
     display: none;
   }
+
+  .workspaceStatusbar {
+    padding-right: 18px;
+  }
+
+  .returnToHero {
+    min-height: 26px;
+
+    padding:
+      0 4px 0 12px;
+
+    font-size: 10px;
+  }
 }
 
 
@@ -1559,6 +1666,321 @@
 }
 
 
+
+/* ========================================
+   BEANLOG DOCUMENT
+======================================== */
+
+.beanlogDocument {
+  width:
+    min(
+      860px,
+      calc(100% - 72px)
+    );
+}
+
+.beanlogHeading {
+  max-width: 680px;
+
+  margin-bottom:
+    clamp(
+      62px,
+      9vh,
+      96px
+    );
+}
+
+.beanlogHeading h2 {
+  margin:
+    18px 0 0;
+
+  color: #ebe9e4;
+
+  font-size:
+    clamp(
+      58px,
+      6.4vw,
+      96px
+    );
+
+  font-weight: 440;
+
+  line-height: 0.9;
+
+  letter-spacing: -0.065em;
+}
+
+.beanlogHeading > p {
+  margin:
+    30px 0 0;
+
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.68
+    );
+
+  font-size: 15px;
+
+  line-height: 1.8;
+
+  word-break: keep-all;
+}
+
+.beanlogAside {
+  display: block;
+
+  margin-top: 9px;
+
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.38
+    );
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 10px;
+
+  line-height: 1.7;
+}
+
+
+/* ========================================
+   RESIDENT DIARY
+======================================== */
+
+.diaryStream {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.diaryEntry {
+  position: relative;
+
+  padding:
+    30px 32px 28px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.07
+    );
+
+  border-radius: 10px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.018
+    );
+}
+
+.diaryEntry::before {
+  content: "";
+
+  position: absolute;
+
+  top: 18px;
+  bottom: 18px;
+  left: 0;
+
+  width: 2px;
+
+  background:
+    rgba(
+      236,
+      234,
+      229,
+      0.11
+    );
+}
+
+.diaryEntryTop {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 26px;
+}
+
+.diaryEntryTop > div {
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 12px;
+}
+
+.diaryResident {
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.82
+    );
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.14em;
+}
+
+.diaryDate,
+.diaryMood {
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.34
+    );
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 9px;
+
+  letter-spacing: 0.05em;
+}
+
+.diaryMood {
+  white-space: nowrap;
+}
+
+.diaryText {
+  max-width: 610px;
+
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.68
+    );
+
+  font-size: 14px;
+
+  line-height: 1.95;
+
+  word-break: keep-all;
+}
+
+.diaryText p {
+  margin:
+    0 0 10px;
+}
+
+.diaryText p:last-child {
+  margin-bottom: 0;
+}
+
+.diaryEntrySmall {
+  max-width: 560px;
+}
+
+.beanlogEnding {
+  margin:
+    48px 0 0;
+
+  color:
+    rgba(
+      236,
+      234,
+      229,
+      0.34
+    );
+
+  font-size: 12px;
+
+  line-height: 1.8;
+}
+
+
+/* ========================================
+   BEANLOG MOBILE
+======================================== */
+
+@media (max-width: 780px) {
+  .beanlogDocument {
+    width:
+      calc(100% - 40px);
+  }
+
+  .beanlogHeading {
+    margin-bottom: 54px;
+  }
+
+  .beanlogHeading h2 {
+    font-size:
+      clamp(
+        52px,
+        15vw,
+        76px
+      );
+  }
+
+  .beanlogHeading > p {
+    font-size: 14px;
+  }
+
+  .diaryEntry {
+    padding:
+      24px 22px 23px;
+  }
+
+  .diaryEntryTop {
+    align-items: flex-start;
+
+    margin-bottom: 21px;
+  }
+
+  .diaryMood {
+    font-size: 8px;
+
+    text-align: right;
+  }
+
+  .diaryText {
+    font-size: 13px;
+
+    line-height: 1.9;
+  }
+
+  .beanlogEnding {
+    font-size: 11px;
+  }
+}
+
+
 /* ========================================
    REDUCED MOTION
 ======================================== */
@@ -1571,5 +1993,104 @@
   .roomLayer {
     transform:
       none !important;
+  }
+}
+/* ========================================
+   WORKSPACE DOCUMENT SWITCHING
+======================================== */
+
+.workspaceDocument {
+  opacity: 1;
+  transition:
+    opacity 90ms linear,
+    filter 90ms linear;
+}
+
+.workspaceDocumentSwitching {
+  opacity: 0.06;
+  filter: brightness(1.08);
+}
+
+/* ========================================
+   CLICKABLE WORKSPACE NAV
+======================================== */
+
+button.navItem {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+button.navItem:hover {
+  background: rgba(255, 255, 255, 0.028);
+  color: rgba(236, 234, 229, 0.68);
+}
+
+button.navItem.navItemActive {
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(236, 234, 229, 0.82);
+}
+
+button.navItem:focus-visible {
+  outline: 1px solid rgba(117, 255, 180, 0.34);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   ARCHIVE
+======================================== */
+
+.archiveEnding {
+  max-width: 600px;
+  margin: 42px 0 0;
+  color: rgba(236, 234, 229, 0.38);
+  font-size: 13px;
+  line-height: 1.9;
+  word-break: keep-all;
+}
+
+/* ========================================
+   READABILITY POLISH
+======================================== */
+
+.breadcrumb {
+  color: rgba(236, 234, 229, 0.42);
+  font-size: 10px;
+}
+
+.breadcrumb strong {
+  color: rgba(236, 234, 229, 0.68);
+}
+
+.navLabel {
+  color: rgba(236, 234, 229, 0.38);
+  font-size: 10px;
+}
+
+.documentHeading p {
+  color: rgba(236, 234, 229, 0.62);
+  font-size: 14px;
+}
+
+.obsessionMeta span {
+  color: rgba(236, 234, 229, 0.4);
+  font-size: 10px;
+}
+
+@media (max-width: 780px) {
+  .documentHeading p {
+    font-size: 13px;
+  }
+
+  .obsessionMeta span {
+    font-size: 9px;
+  }
+
+  .archiveEnding {
+    font-size: 12px;
   }
 }
