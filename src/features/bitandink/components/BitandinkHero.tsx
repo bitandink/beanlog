@@ -8,7 +8,7 @@ import {
 
 import styles from "../styles/bitandink.module.css";
 
-type WorkspaceView = "current" | "archive" | "beanlog";
+type WorkspaceView = "current" | "archive" | "beanlog" | "perfugium" | "playground";
 
 function clamp(
   value: number,
@@ -48,6 +48,62 @@ export default function BitandinkHero() {
 
   const [isSwitching, setIsSwitching] =
     useState(false);
+
+  useEffect(() => {
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const requested =
+      params.get("view");
+
+    if (
+      requested !== "archive" &&
+      requested !== "perfugium" &&
+      requested !== "playground"
+    ) {
+      return;
+    }
+
+    setActiveView(requested);
+
+    const frame =
+      window.requestAnimationFrame(
+        () => {
+          const journey =
+            journeyRef.current;
+
+          if (!journey) {
+            return;
+          }
+
+          const workspaceTop =
+            journey.offsetTop +
+            journey.offsetHeight -
+            window.innerHeight;
+
+          window.scrollTo({
+            top: workspaceTop,
+            behavior: "auto",
+          });
+
+          workspaceMainRef.current?.scrollTo({
+            top: 0,
+            behavior: "auto",
+          });
+
+          workspaceLockedRef.current =
+            true;
+        }
+      );
+
+    return () => {
+      window.cancelAnimationFrame(
+        frame
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const journey = journeyRef.current;
@@ -441,6 +497,14 @@ export default function BitandinkHero() {
     workspaceLockedRef.current = false;
     returningToHeroRef.current = true;
 
+    if (window.location.search) {
+      window.history.replaceState(
+        null,
+        "",
+        "/bitandink"
+      );
+    }
+
     journeyRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -594,10 +658,23 @@ export default function BitandinkHero() {
                     <strong>Beanlog</strong>
                   </button>
 
-                  <div className={styles.navItem}>
+                  <button
+                    type="button"
+                    className={[
+                      styles.navItem,
+                      activeView === "perfugium"
+                        ? styles.navItemActive
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() =>
+                      handleViewChange("perfugium")
+                    }
+                  >
                     <span>↗</span>
                     <strong>Perfugium</strong>
-                  </div>
+                  </button>
                 </div>
 
                 <div className={styles.navGroup}>
@@ -605,10 +682,23 @@ export default function BitandinkHero() {
                     LAB
                   </span>
 
-                  <div className={styles.navItem}>
+                  <button
+                    type="button"
+                    className={[
+                      styles.navItem,
+                      activeView === "playground"
+                        ? styles.navItemActive
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() =>
+                      handleViewChange("playground")
+                    }
+                  >
                     <span>+</span>
                     <strong>Playground</strong>
-                  </div>
+                  </button>
                 </div>
               </nav>
 
@@ -977,7 +1067,7 @@ export default function BitandinkHero() {
                     천천히 이곳으로 옮겨둘 예정.
                   </p>
                 </article>
-              ) : (
+              ) : activeView === "beanlog" ? (
                 <article
                   className={[
                     documentClassName,
@@ -1182,6 +1272,316 @@ export default function BitandinkHero() {
                     이곳의 기록은 정해진 주기도,
                     특별한 목적도 없다.
                   </p>
+                </article>
+              ) : activeView === "perfugium" ? (
+                <article
+                  className={[
+                    documentClassName,
+                    styles.perfugiumDocument,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <header
+                    className={styles.perfugiumHeading}
+                  >
+                    <span
+                      className={styles.documentIndex}
+                    >
+                      04 / SPACE
+                    </span>
+
+                    <h2>Perfugium</h2>
+
+                    <p>
+                      생각이 오래 머물렀던 곳.
+                    </p>
+
+                    <span
+                      className={styles.perfugiumAside}
+                    >
+                      기술과 사람,
+                      그리고 그 사이에서 떠오른 것들.
+                    </span>
+                  </header>
+
+                  <div
+                    className={styles.perfugiumList}
+                  >
+                    <a
+                      className={styles.perfugiumEntry}
+                      href="https://blog.naver.com/bitandink/224205543377"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div
+                        className={styles.perfugiumEntryTop}
+                      >
+                        <span
+                          className={styles.perfugiumNumber}
+                        >
+                          01
+                        </span>
+
+                        <span
+                          className={styles.perfugiumMeta}
+                        >
+                          2026.03.05 · AI / HUMAN / ESSAY
+                        </span>
+                      </div>
+
+                      <div
+                        className={styles.perfugiumEntryBody}
+                      >
+                        <h3>
+                          춤추는 로봇을 보고
+                          이상한 질문이 떠올랐다
+                        </h3>
+
+                        <p
+                          className={styles.perfugiumSubtitle}
+                        >
+                          우리는 왜 AI에게 성격을 느낄까
+                        </p>
+
+                        <p
+                          className={styles.perfugiumExcerpt}
+                        >
+                          로봇의 춤에서 인간을 보고,
+                          AI의 대답에서 성격을 발견했다.
+                          그런데 정말 AI에게 성격이 있었던 걸까.
+                        </p>
+                      </div>
+
+                      <span
+                        className={styles.perfugiumRead}
+                      >
+                        ↗ read essay
+                      </span>
+                    </a>
+
+                    <a
+                      className={styles.perfugiumEntry}
+                      href="https://blog.naver.com/bitandink/224221454392"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div
+                        className={styles.perfugiumEntryTop}
+                      >
+                        <span
+                          className={styles.perfugiumNumber}
+                        >
+                          02
+                        </span>
+
+                        <span
+                          className={styles.perfugiumMeta}
+                        >
+                          2026.03.18 · WRITING / AI / IDENTITY
+                        </span>
+                      </div>
+
+                      <div
+                        className={styles.perfugiumEntryBody}
+                      >
+                        <h3>
+                          내가 쓴 소설이
+                          AI가 쓴 글이라고 한다
+                        </h3>
+
+                        <p
+                          className={styles.perfugiumSubtitle}
+                        >
+                          80% 판정 받음
+                        </p>
+
+                        <p
+                          className={styles.perfugiumExcerpt}
+                        >
+                          내가 쓴 글을 인간이 쓴 글이라고
+                          증명해야 하는 시대.
+                          잘 쓰는 것이 오히려 의심의 근거가 된다는
+                          기묘한 경험에서 시작한 기록.
+                        </p>
+                      </div>
+
+                      <span
+                        className={styles.perfugiumRead}
+                      >
+                        ↗ read essay
+                      </span>
+                    </a>
+
+                    <a
+                      className={styles.perfugiumEntry}
+                      href="https://blog.naver.com/bitandink/224165184517"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div
+                        className={styles.perfugiumEntryTop}
+                      >
+                        <span
+                          className={styles.perfugiumNumber}
+                        >
+                          03
+                        </span>
+
+                        <span
+                          className={styles.perfugiumMeta}
+                        >
+                          2026.01.30 · AI / JUDGMENT / HUMAN
+                        </span>
+                      </div>
+
+                      <div
+                        className={styles.perfugiumEntryBody}
+                      >
+                        <h3>
+                          모든 AI는 move37을
+                          향한다는 말에 대하여
+                        </h3>
+
+                        <p
+                          className={styles.perfugiumSubtitle}
+                        >
+                          판단을 위임하는 인간의 방식
+                        </p>
+
+                        <p
+                          className={styles.perfugiumExcerpt}
+                        >
+                          AI가 무엇을 판단할 수 있는가보다,
+                          우리가 무엇을 AI에게 맡기고 있는지를
+                          생각한 글.
+                        </p>
+                      </div>
+
+                      <span
+                        className={styles.perfugiumRead}
+                      >
+                        ↗ read essay
+                      </span>
+                    </a>
+
+                    <a
+                      className={styles.perfugiumEntry}
+                      href="https://blog.naver.com/bitandink/224318112646"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div
+                        className={styles.perfugiumEntryTop}
+                      >
+                        <span
+                          className={styles.perfugiumNumber}
+                        >
+                          04
+                        </span>
+
+                        <span
+                          className={styles.perfugiumMeta}
+                        >
+                          2026.06.16 · PERSON / LITERATURE / FREEDOM
+                        </span>
+                      </div>
+
+                      <div
+                        className={styles.perfugiumEntryBody}
+                      >
+                        <h3>
+                          자기 방식으로 살았던 사람
+                        </h3>
+
+                        <p
+                          className={styles.perfugiumSubtitle}
+                        >
+                          루 안드레아스 살로메
+                        </p>
+
+                        <p
+                          className={styles.perfugiumExcerpt}
+                        >
+                          누군가의 뮤즈가 아니라,
+                          자기 삶의 형식을 끝까지
+                          스스로 고르려 했던 한 사람에 대하여.
+                        </p>
+                      </div>
+
+                      <span
+                        className={styles.perfugiumRead}
+                      >
+                        ↗ read essay
+                      </span>
+                    </a>
+                  </div>
+
+                  <footer
+                    className={styles.perfugiumFooter}
+                  >
+                    <div>
+                      <span>
+                        여기에 꺼내놓은 건 몇 편뿐이다.
+                      </span>
+
+                      <p>
+                        더 많은 글은 bitandink의
+                        네이버 블로그에 쌓여 있다.
+                      </p>
+                    </div>
+
+                    <a
+                      href="https://blog.naver.com/bitandink"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      more writings ↗
+                    </a>
+                  </footer>
+                </article>
+              ) : (
+                <article
+                  className={[
+                    documentClassName,
+                    styles.playgroundDocument,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <header
+                    className={styles.playgroundHeading}
+                  >
+                    <span
+                      className={styles.documentIndex}
+                    >
+                      05 / LAB
+                    </span>
+
+                    <h2>Playground</h2>
+
+                    <p>
+                      아직 정리되지 않은
+                      장난감 상자.
+                    </p>
+
+                    <span
+                      className={styles.playgroundAside}
+                    >
+                      tomorrow, maybe.
+                    </span>
+                  </header>
+
+                  <div
+                    className={styles.playgroundPlaceholder}
+                  >
+                    <span>STATUS / NOT READY</span>
+
+                    <p>
+                      작은 게임과 이상한 인터랙션을
+                      넣을 자리만 먼저 열어두었다.
+                    </p>
+                  </div>
                 </article>
               )}
             </main>

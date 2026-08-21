@@ -791,6 +791,11 @@ export default function BeanlogWorld() {
     setTerminalHistory,
   ] = useState<TerminalHistoryItem[]>([]);
 
+  const [
+    terminalBusy,
+    setTerminalBusy,
+  ] = useState(false);
+
   const terminalInputRef =
     useRef<HTMLInputElement>(null);
 
@@ -1179,6 +1184,144 @@ export default function BeanlogWorld() {
     ]);
   }
 
+  function wait(ms: number) {
+    return new Promise<void>((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  async function typeTerminalOutput(
+    lines: readonly string[],
+    options?: {
+      charDelay?: number;
+      lineDelay?: number;
+    }
+  ) {
+    const charDelay =
+      options?.charDelay ?? 26;
+
+    const lineDelay =
+      options?.lineDelay ?? 180;
+
+    for (
+      let lineIndex = 0;
+      lineIndex < lines.length;
+      lineIndex += 1
+    ) {
+      const fullLine = lines[lineIndex];
+
+      const item =
+        createHistoryItem(
+          "output",
+          ""
+        );
+
+      setTerminalHistory((prev) => [
+        ...prev,
+        item,
+      ]);
+
+      for (
+        let charIndex = 1;
+        charIndex <= fullLine.length;
+        charIndex += 1
+      ) {
+        const partial =
+          fullLine.slice(
+            0,
+            charIndex
+          );
+
+        setTerminalHistory((prev) =>
+          prev.map((historyItem) =>
+            historyItem.id === item.id
+              ? {
+                  ...historyItem,
+                  text: partial,
+                }
+              : historyItem
+          )
+        );
+
+        await wait(charDelay);
+      }
+
+      if (
+        lineIndex <
+        lines.length - 1
+      ) {
+        await wait(lineDelay);
+      }
+    }
+  }
+
+  async function gotoWorkspace(
+    destination:
+      | "bitandink"
+      | "archive"
+      | "perfugium"
+      | "playground"
+  ) {
+    if (terminalBusy) {
+      return;
+    }
+
+    setTerminalBusy(true);
+
+    const config = {
+      bitandink: {
+        lines: [
+          "> leaving Beanlog...",
+          "> crossing world boundary...",
+          "> connection established.",
+        ],
+        href: "/bitandink",
+      },
+
+      archive: {
+        lines: [
+          "> locating Archive...",
+          "> opening old records...",
+          "> connection established.",
+        ],
+        href: "/bitandink?view=archive",
+      },
+
+      perfugium: {
+        lines: [
+          "> locating Perfugium...",
+          "> opening quiet space...",
+          "> connection established.",
+        ],
+        href: "/bitandink?view=perfugium",
+      },
+
+      playground: {
+        lines: [
+          "> locating Playground...",
+          "> unstable area detected...",
+          "> opening connection...",
+        ],
+        href: "/bitandink?view=playground",
+      },
+    } as const;
+
+    const target =
+      config[destination];
+
+    await typeTerminalOutput(
+      target.lines,
+      {
+        charDelay: 24,
+        lineDelay: 190,
+      }
+    );
+
+    await wait(260);
+
+    router.push(target.href);
+  }
+
   /* ========================================
      TERMINAL COMMANDS
   ======================================== */
@@ -1231,6 +1374,9 @@ export default function BeanlogWorld() {
         "> status",
         "> clear",
         "> goto bitandink",
+        "> goto archive",
+        "> goto perfugium",
+        "> goto playground",
       ]);
 
       return;
@@ -1427,25 +1573,39 @@ export default function BeanlogWorld() {
       command === "goto bitandink" ||
       command === "goto bitandink.site"
     ) {
-      addTerminalOutput([
-        "> leaving Beanlog...",
-      ]);
+      void gotoWorkspace(
+        "bitandink"
+      );
 
-      window.setTimeout(() => {
-        addTerminalOutput([
-          "> crossing world boundary...",
-        ]);
-      }, 450);
+      return;
+    }
 
-      window.setTimeout(() => {
-        addTerminalOutput([
-          "> connection established.",
-        ]);
-      }, 900);
+    if (
+      command === "goto archive"
+    ) {
+      void gotoWorkspace(
+        "archive"
+      );
 
-      window.setTimeout(() => {
-        router.push("/bitandink");
-      }, 1350);
+      return;
+    }
+
+    if (
+      command === "goto perfugium"
+    ) {
+      void gotoWorkspace(
+        "perfugium"
+      );
+
+      return;
+    }
+
+    if (
+      command === "goto playground"
+    ) {
+      void gotoWorkspace(
+        "playground"
+      );
 
       return;
     }
@@ -1471,7 +1631,10 @@ export default function BeanlogWorld() {
     const command =
       terminalInput.trim();
 
-    if (!command) {
+    if (
+      !command ||
+      terminalBusy
+    ) {
       return;
     }
 
@@ -1942,6 +2105,7 @@ export default function BeanlogWorld() {
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
+                  disabled={terminalBusy}
                   aria-label="Beanlog terminal command"
                 />
               </form>
