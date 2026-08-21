@@ -1,402 +1,1575 @@
 /* ========================================
-   HERO
+   HERO JOURNEY
 ======================================== */
 
-.hero {
-    position: relative;
-  
-    width: 100%;
-    min-height: 100svh;
-  
-    overflow: hidden;
-  
-    background: #101114;
-    color: #eceae5;
-  }
-  
-  
-  /* ========================================
-     WORKSPACE IMAGE
-  
-     public/bitandink/background-image.webp
-  ======================================== */
-  
-  .workspaceImage {
-    position: absolute;
-  
-    z-index: 1;
-  
-    right: 0;
-    bottom: 0;
-  
-    width: min(76vw, 1380px);
-    height: min(88vh, 920px);
-  
-    background-image: url("/bitandink/background-image.webp");
-    background-repeat: no-repeat;
-  
-    /*
-      Keep the entire artwork visible
-      while anchoring it to bottom-right.
-    */
-    background-size: contain;
-    background-position: right bottom;
-  
-    pointer-events: none;
-  }
-  
-  
-  /* ========================================
-     IMAGE → PAGE BLENDING
-  
-     Prevents the rectangular image edge
-     from looking pasted onto the black page.
-  ======================================== */
-  
-  .imageFade {
-    position: absolute;
-  
-    z-index: 2;
-  
-    right: 0;
-    bottom: 0;
-  
-    width: min(82vw, 1480px);
-    height: 100%;
-  
-    pointer-events: none;
-  
-    background:
-      linear-gradient(
-        90deg,
-        #101114 0%,
-        rgba(16, 17, 20, 0.96) 8%,
-        rgba(16, 17, 20, 0.74) 18%,
-        rgba(16, 17, 20, 0.22) 36%,
-        rgba(16, 17, 20, 0) 54%
-      ),
-      linear-gradient(
-        180deg,
-        #101114 0%,
-        rgba(16, 17, 20, 0.76) 9%,
-        rgba(16, 17, 20, 0.12) 27%,
-        transparent 42%
-      );
-  }
-  
-  
-  /* ========================================
-     VERY SUBTLE TEXTURE
-  ======================================== */
-  
-  .backgroundTexture {
-    position: absolute;
-  
-    z-index: 3;
-    inset: 0;
-  
-    pointer-events: none;
-  
-    opacity: 0.035;
-  
-    background-image:
-      linear-gradient(
-        rgba(255, 255, 255, 0.014) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.011) 1px,
-        transparent 1px
-      );
-  
-    background-size: 54px 54px;
-  
-    mask-image: linear-gradient(
-      to bottom,
-      black,
-      transparent 75%
+.heroJourney {
+  position: relative;
+
+  width: 100%;
+  height: 330svh;
+
+  background: #101114;
+}
+
+
+/* ========================================
+   STICKY VIEWPORT
+======================================== */
+
+.heroSticky {
+  --scene-scale: 1;
+  --scene-x: 0px;
+  --scene-y: 0px;
+
+  --identity-opacity: 1;
+  --hint-opacity: 1;
+  --room-opacity: 1;
+
+  --portal-top: 37%;
+  --portal-left: 66%;
+  --portal-width: 26%;
+  --portal-height: 32%;
+  --portal-opacity: 0;
+
+  --workspace-opacity: 0;
+  --workspace-y: 22px;
+
+  position: sticky;
+
+  top: 0;
+
+  width: 100%;
+  height: 100svh;
+
+  overflow: hidden;
+
+  background: #101114;
+  color: #eceae5;
+
+  isolation: isolate;
+}
+
+
+/* ========================================
+   ROOM
+======================================== */
+
+.roomLayer {
+  position: absolute;
+
+  z-index: 1;
+
+  inset: 0;
+
+  opacity:
+    var(--room-opacity);
+
+  transform:
+    translate3d(var(--scene-x),
+      var(--scene-y),
+      0) scale(var(--scene-scale));
+
+  transform-origin:
+    79% 55%;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* ========================================
+   WORKSPACE IMAGE
+======================================== */
+
+.workspaceImage {
+  position: absolute;
+
+  z-index: 1;
+
+  right: 0;
+  bottom: 0;
+
+  width:
+    min(76vw,
+      1380px);
+
+  height:
+    min(88vh,
+      920px);
+
+  background-image:
+    url("/bitandink/background-image.webp"
     );
+
+  background-repeat:
+    no-repeat;
+
+  background-size:
+    contain;
+
+  background-position:
+    right bottom;
+
+  pointer-events:
+    none;
+}
+
+
+/* ========================================
+   IMAGE FADE
+======================================== */
+
+.imageFade {
+  position: absolute;
+
+  z-index: 2;
+
+  right: 0;
+  bottom: 0;
+
+  width:
+    min(82vw,
+      1480px);
+
+  height: 100%;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(90deg,
+      #101114 0%,
+      rgba(16, 17, 20, 0.96) 8%,
+      rgba(16, 17, 20, 0.74) 18%,
+      rgba(16, 17, 20, 0.22) 36%,
+      rgba(16, 17, 20, 0) 54%),
+
+    linear-gradient(180deg,
+      #101114 0%,
+      rgba(16, 17, 20, 0.76) 9%,
+      rgba(16, 17, 20, 0.12) 27%,
+      transparent 42%);
+}
+
+
+/* ========================================
+   BACKGROUND TEXTURE
+======================================== */
+
+.backgroundTexture {
+  position: absolute;
+
+  z-index: 3;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: 0.032;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px,
+      transparent 1px),
+
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0.011) 1px,
+      transparent 1px);
+
+  background-size:
+    54px 54px;
+
+  mask-image:
+    linear-gradient(to bottom,
+      black,
+      transparent 82%);
+}
+
+
+/* ========================================
+   IDENTITY
+======================================== */
+
+.identity {
+  position: absolute;
+
+  z-index: 10;
+
+  top:
+    clamp(58px,
+      8vh,
+      105px);
+
+  left:
+    clamp(38px,
+      5.8vw,
+      110px);
+
+  opacity:
+    var(--identity-opacity);
+
+  will-change:
+    opacity;
+}
+
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 22px;
+
+  color:
+    rgba(232,
+      230,
+      225,
+      0.4);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 10px;
+
+  letter-spacing:
+    0.14em;
+}
+
+
+.title {
+  margin: 0;
+
+  color: #eceae5;
+
+  font-size:
+    clamp(56px,
+      5.5vw,
+      82px);
+
+  font-weight: 500;
+
+  letter-spacing:
+    -0.06em;
+
+  line-height:
+    0.94;
+}
+
+
+.subtitle {
+  margin:
+    26px 0 0;
+
+  color:
+    rgba(232,
+      230,
+      225,
+      0.43);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size:
+    clamp(10px,
+      0.82vw,
+      13px);
+
+  letter-spacing:
+    0.025em;
+
+  line-height:
+    1.85;
+}
+
+
+/* ========================================
+   SCROLL HINT
+======================================== */
+
+.scrollHint {
+  position: absolute;
+
+  z-index: 10;
+
+  left:
+    clamp(38px,
+      5.8vw,
+      110px);
+
+  bottom: 42px;
+
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 13px;
+
+  opacity:
+    var(--hint-opacity);
+
+  color:
+    rgba(232,
+      230,
+      225,
+      0.25);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 9px;
+
+  line-height: 1.5;
+
+  pointer-events: none;
+}
+
+
+.scrollText {
+  display: flex;
+
+  flex-direction:
+    column;
+}
+
+
+.mouseHint {
+  position: relative;
+
+  display: block;
+
+  width: 14px;
+  height: 26px;
+
+  border:
+    1px solid rgba(232,
+      230,
+      225,
+      0.22);
+
+  border-radius: 8px;
+}
+
+
+.mouseHint i {
+  position: absolute;
+
+  top: 5px;
+  left: 50%;
+
+  width: 2px;
+  height: 4px;
+
+  border-radius: 2px;
+
+  background:
+    rgba(232,
+      230,
+      225,
+      0.32);
+
+  transform:
+    translateX(-50%);
+}
+
+
+.scrollLine {
+  width: 36px;
+  height: 1px;
+
+  background:
+    rgba(232,
+      230,
+      225,
+      0.14);
+}
+
+
+/* ========================================
+   MONITOR PORTAL
+======================================== */
+
+.monitorPortal {
+  position: absolute;
+
+  z-index: 20;
+
+  top:
+    var(--portal-top);
+
+  left:
+    var(--portal-left);
+
+  width:
+    var(--portal-width);
+
+  height:
+    var(--portal-height);
+
+  overflow: hidden;
+
+  opacity:
+    var(--portal-opacity);
+
+  background:
+    #0d0f12;
+
+  border:
+    1px solid rgba(255,
+      255,
+      255,
+      0.045);
+
+  will-change:
+    top,
+    left,
+    width,
+    height,
+    opacity;
+}
+
+
+/* ========================================
+   WORKSPACE SHELL
+======================================== */
+
+.workspaceShell {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100svh;
+
+  display: grid;
+
+  grid-template-columns:
+    238px minmax(0, 1fr);
+
+  grid-template-rows:
+    minmax(0, 1fr) 28px;
+
+  opacity:
+    var(--workspace-opacity);
+
+  transform:
+    translate3d(0,
+      var(--workspace-y),
+      0);
+
+  background:
+    #101114;
+
+  color:
+    #e7e5df;
+
+  will-change:
+    opacity,
+    transform;
+}
+
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+.workspaceSidebar {
+  position: relative;
+
+  grid-column: 1;
+  grid-row: 1;
+
+  display: flex;
+
+  flex-direction:
+    column;
+
+  padding:
+    22px 14px 18px;
+
+  border-right:
+    1px solid rgba(255,
+      255,
+      255,
+      0.055);
+
+  background:
+    #0c0d10;
+}
+
+
+/* ========================================
+   WORKSPACE IDENTITY
+======================================== */
+
+.workspaceIdentity {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 11px;
+
+  min-height: 50px;
+
+  padding:
+    0 9px 17px;
+
+  border-bottom:
+    1px solid rgba(255,
+      255,
+      255,
+      0.045);
+}
+
+
+.workspaceMark {
+  display: grid;
+
+  place-items:
+    center;
+
+  width: 28px;
+  height: 28px;
+
+  border:
+    1px solid rgba(255,
+      255,
+      255,
+      0.09);
+
+  border-radius: 7px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.82);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+}
+
+
+.workspaceIdentity div {
+  display: flex;
+
+  flex-direction:
+    column;
+
+  gap: 3px;
+}
+
+
+.workspaceIdentity strong {
+  color:
+    rgba(236,
+      234,
+      229,
+      0.85);
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  letter-spacing:
+    -0.01em;
+}
+
+
+.workspaceIdentity div span {
+  color:
+    rgba(236,
+      234,
+      229,
+      0.28);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 8px;
+
+  letter-spacing:
+    0.08em;
+}
+
+
+/* ========================================
+   NAVIGATION
+======================================== */
+
+.workspaceNav {
+  display: flex;
+
+  flex-direction:
+    column;
+
+  gap: 28px;
+
+  padding-top:
+    24px;
+}
+
+
+.navGroup {
+  display: flex;
+
+  flex-direction:
+    column;
+
+  gap: 3px;
+}
+
+
+.navLabel {
+  display: block;
+
+  margin:
+    0 9px 8px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.38);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 10px;
+
+  letter-spacing:
+    0.16em;
+}
+
+
+.navItem {
+  display: grid;
+
+  grid-template-columns:
+    20px 1fr;
+
+  align-items:
+    center;
+
+  min-height: 33px;
+
+  padding:
+    0 9px;
+
+  border-radius:
+    6px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.38);
+
+  font-size:
+    13px;
+}
+
+
+.navItem>span {
+  color:
+    rgba(236,
+      234,
+      229,
+      0.22);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+
+
+.navItem strong {
+  font-weight: 400;
+}
+
+
+.navItemActive {
+  background:
+    rgba(255,
+      255,
+      255,
+      0.045);
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.82);
+}
+
+
+.navItemActive>span {
+  color:
+    rgba(117,
+      255,
+      180,
+      0.55);
+}
+
+
+/* ========================================
+   SIDEBAR FOOTER
+======================================== */
+
+.sidebarFooter {
+  margin-top: auto;
+
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  padding:
+    12px 9px 0;
+
+  border-top:
+    1px solid rgba(255,
+      255,
+      255,
+      0.04);
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.2);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 8px;
+}
+
+
+.sidebarFooter i {
+  display: block;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius:
+    50%;
+
+  background:
+    rgba(117,
+      255,
+      180,
+      0.55);
+}
+
+
+/* ========================================
+   MAIN
+======================================== */
+
+.workspaceMain {
+  grid-column: 2;
+  grid-row: 1;
+
+  min-width: 0;
+
+  overflow-y: auto;
+
+  background:
+    #111214;
+}
+
+
+/* ========================================
+   TOP BAR
+======================================== */
+
+.workspaceTopbar {
+  position: sticky;
+
+  z-index: 5;
+
+  top: 0;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  padding:
+    0 24px;
+
+  border-bottom:
+    1px solid rgba(255,
+      255,
+      255,
+      0.05);
+
+  background:
+    rgba(17,
+      18,
+      20,
+      0.92);
+
+  backdrop-filter:
+    blur(12px);
+}
+
+
+/* ========================================
+   BREADCRUMB
+======================================== */
+
+.breadcrumb {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 7px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.42);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 10px;
+
+  letter-spacing:
+    0.04em;
+}
+
+
+.breadcrumb i {
+  opacity: 0.35;
+
+  font-style: normal;
+}
+
+
+.breadcrumb strong {
+  color:
+    rgba(236,
+      234,
+      229,
+      0.68);
+
+  font-weight: 400;
+}
+
+
+/* ========================================
+   STATUS
+======================================== */
+
+.workspaceStatus {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 7px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.28);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 8px;
+
+  letter-spacing:
+    0.08em;
+}
+
+
+.workspaceStatus i {
+  width: 5px;
+  height: 5px;
+
+  border-radius:
+    50%;
+
+  background:
+    rgba(117,
+      255,
+      180,
+      0.66);
+
+  box-shadow:
+    0 0 8px rgba(117,
+      255,
+      180,
+      0.15);
+}
+
+
+/* ========================================
+   DOCUMENT
+======================================== */
+
+.currentDocument {
+  width:
+    min(820px,
+      calc(100% - 72px));
+
+  margin:
+    0 auto;
+
+  padding:
+    clamp(70px,
+      10vh,
+      120px) 0 120px;
+}
+
+
+/* ========================================
+   DOCUMENT HEADING
+======================================== */
+
+.documentHeading {
+  max-width:
+    680px;
+
+  margin-bottom:
+    clamp(70px,
+      10vh,
+      110px);
+}
+
+
+.documentIndex {
+  display: block;
+
+  margin-bottom:
+    26px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.25);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 9px;
+
+  letter-spacing:
+    0.15em;
+}
+
+
+.documentHeading h2 {
+  margin: 0;
+
+  color:
+    #ebe9e4;
+
+  font-size:
+    clamp(56px,
+      7vw,
+      108px);
+
+  font-weight: 440;
+
+  line-height:
+    0.86;
+
+  letter-spacing:
+    -0.065em;
+}
+
+
+.documentHeading p {
+  margin: 34px 0 0;
+
+  color: rgba(236, 234, 229, 0.62);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+
+/* ========================================
+   OBSESSION LIST
+======================================== */
+
+.obsessionList {
+  border-top:
+    1px solid rgba(255,
+      255,
+      255,
+      0.07);
+}
+
+
+.obsessionItem {
+  display: grid;
+
+  grid-template-columns:
+    50px 1fr;
+
+  gap: 18px;
+
+  padding:
+    34px 4px 37px;
+
+  border-bottom:
+    1px solid rgba(255,
+      255,
+      255,
+      0.055);
+}
+
+
+/* ========================================
+   NUMBER
+======================================== */
+
+.obsessionNumber {
+  padding-top:
+    5px;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.2);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 8px;
+}
+
+
+/* ========================================
+   TITLE
+======================================== */
+
+.obsessionTitle {
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap: 20px;
+}
+
+
+.obsessionTitle h3 {
+  margin: 0;
+
+  color: rgba(242, 240, 235, 0.94);
+
+  font-size: clamp(24px, 2vw, 32px);
+
+  font-weight: 500;
+  line-height: 1.15;
+
+  letter-spacing:
+    -0.035em;
+}
+
+
+.obsessionTitle span {
+  color: rgba(117, 255, 180, 0.58);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: 0.08em;
+}
+
+
+/* ========================================
+   SHORT DESCRIPTION
+======================================== */
+
+.obsessionBody > p {
+  margin: 12px 0 22px;
+
+  color: rgba(236, 234, 229, 0.58);
+
+  font-size: 15px;
+  line-height: 1.7;
+
+  word-break: keep-all;
+}
+
+
+/* ========================================
+   LONGER DOCUMENT TEXT
+
+   Notion-like readable document content.
+======================================== */
+
+.obsessionDescription {
+  max-width: 640px;
+
+  margin-bottom: 26px;
+
+  color: rgba(236, 234, 229, 0.48);
+
+  font-size: 14px;
+  line-height: 1.9;
+
+  word-break: keep-all;
+}
+
+
+.obsessionDescription p {
+  margin: 0 0 12px;
+}
+
+
+.obsessionDescription p:last-child {
+  margin-bottom: 0;
+}
+
+
+.playgroundNote {
+  color: rgba(236, 234, 229, 0.68);
+
+  font-style: italic;
+}
+
+
+/* ========================================
+   META
+======================================== */
+
+.obsessionMeta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 10px 16px;
+
+  margin-top: 24px;
+}
+
+
+.obsessionMeta span {
+  color: rgba(236, 234, 229, 0.4);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 10px;
+
+  letter-spacing: 0.05em;
+}
+
+
+/* ========================================
+   STATUS BAR
+======================================== */
+
+.workspaceStatusbar {
+  grid-column:
+    1 / -1;
+
+  grid-row: 2;
+
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  padding:
+    0 13px;
+
+  border-top:
+    1px solid rgba(255,
+      255,
+      255,
+      0.055);
+
+  background:
+    #0b0c0e;
+
+  color:
+    rgba(236,
+      234,
+      229,
+      0.22);
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 7px;
+
+  letter-spacing:
+    0.04em;
+}
+
+
+.workspaceStatusbar div {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 15px;
+}
+
+
+/* ========================================
+   LARGE SCREEN
+======================================== */
+
+@media (min-width: 1700px) {
+  .workspaceImage {
+    width:
+      min(73vw,
+        1460px);
+
+    height:
+      90vh;
   }
-  
-  
-  /* ========================================
-     IDENTITY
-  ======================================== */
-  
+
+  .imageFade {
+    width:
+      min(80vw,
+        1540px);
+  }
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1100px) {
+  .workspaceImage {
+    right: -9vw;
+
+    width: 92vw;
+    height: 78vh;
+  }
+
+  .workspaceShell {
+    grid-template-columns:
+      200px minmax(0, 1fr);
+  }
+
+  .currentDocument {
+    width:
+      calc(100% - 54px);
+  }
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 780px) {
+  .heroJourney {
+    height: 290svh;
+  }
+
+
   .identity {
-    position: absolute;
-  
-    z-index: 10;
-  
-    top: clamp(58px, 8vh, 105px);
-    left: clamp(38px, 5.8vw, 110px);
+    top: 46px;
+    left: 24px;
   }
-  
-  
-  .eyebrow {
-    display: block;
-  
-    margin-bottom: 22px;
-  
-    color: rgba(232, 230, 225, 0.4);
-  
-    font-family:
-      "SFMono-Regular",
-      Consolas,
-      "Liberation Mono",
-      monospace;
-  
-    font-size: 10px;
-  
-    letter-spacing: 0.14em;
-  }
-  
-  
+
+
   .title {
-    margin: 0;
-  
-    color: #eceae5;
-  
-    font-size: clamp(56px, 5.5vw, 82px);
-    font-weight: 500;
-  
-    letter-spacing: -0.06em;
-    line-height: 0.94;
+    font-size:
+      clamp(48px,
+        15vw,
+        66px);
   }
-  
-  
+
+
   .subtitle {
-    margin: 26px 0 0;
-  
-    color: rgba(232, 230, 225, 0.43);
-  
-    font-family:
-      "SFMono-Regular",
-      Consolas,
-      "Liberation Mono",
-      monospace;
-  
-    font-size: clamp(10px, 0.82vw, 13px);
-  
-    letter-spacing: 0.025em;
+    margin-top:
+      18px;
+
+    font-size:
+      10px;
+  }
+
+
+  .workspaceImage {
+    right: -32%;
+    bottom: 0;
+
+    width: 150%;
+    height: 66%;
+  }
+
+
+  .imageFade {
+    width: 100%;
+    height: 100%;
+
+    background:
+      linear-gradient(180deg,
+        #101114 0%,
+        #101114 30%,
+        rgba(16,
+          17,
+          20,
+          0.82) 40%,
+        rgba(16,
+          17,
+          20,
+          0.12) 64%,
+        transparent 80%);
+  }
+
+
+  .roomLayer {
+    transform-origin:
+      72% 59%;
+  }
+
+
+  .scrollHint {
+    display: none;
+  }
+
+
+  /* ====================================
+     MOBILE WORKSPACE
+  ==================================== */
+
+  .workspaceShell {
+    grid-template-columns:
+      1fr;
+
+    grid-template-rows:
+      minmax(0, 1fr) 26px;
+  }
+
+
+  .workspaceSidebar {
+    display: none;
+  }
+
+
+  .workspaceMain {
+    grid-column: 1;
+  }
+
+
+  .workspaceTopbar {
+    height: 44px;
+
+    padding:
+      0 17px;
+  }
+
+
+  .breadcrumb span:nth-child(1),
+  .breadcrumb i:nth-child(2),
+  .breadcrumb span:nth-child(3),
+  .breadcrumb i:nth-child(4) {
+    display: none;
+  }
+
+
+  .currentDocument {
+    width:
+      calc(100% - 40px);
+
+    padding:
+      62px 0 90px;
+  }
+
+
+  .documentHeading {
+    margin-bottom:
+      65px;
+  }
+
+
+  .documentHeading h2 {
+    font-size:
+      clamp(52px,
+        16vw,
+        84px);
+  }
+
+
+  .obsessionItem {
+    grid-template-columns:
+      34px 1fr;
+
+    gap: 10px;
+
+    padding:
+      29px 0 32px;
+  }
+
+
+  .documentHeading p {
+    margin-top: 24px;
+
+    font-size: 12px;
+  }
+
+
+  .obsessionTitle h3 {
+    font-size: 23px;
+  }
+
+
+  .obsessionBody > p {
+    margin: 10px 0 18px;
+
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+
+  .obsessionDescription {
+    max-width: none;
+
+    margin-bottom: 22px;
+
+    font-size: 13px;
     line-height: 1.85;
   }
-  
-  
-  /* ========================================
-     SCROLL HINT
-  ======================================== */
-  
-  .scrollHint {
-    position: absolute;
-  
-    z-index: 10;
-  
-    left: clamp(38px, 5.8vw, 110px);
-    bottom: 42px;
-  
-    display: flex;
-    align-items: center;
-  
-    gap: 13px;
-  
-    color: rgba(232, 230, 225, 0.25);
-  
-    font-family:
-      "SFMono-Regular",
-      Consolas,
-      monospace;
-  
-    font-size: 9px;
-  
-    line-height: 1.5;
+
+
+  .obsessionMeta {
+    gap: 8px 12px;
+
+    margin-top: 20px;
   }
-  
-  
-  .scrollText {
-    display: flex;
-    flex-direction: column;
+
+
+  .obsessionMeta span {
+    font-size: 8px;
   }
-  
-  
-  .mouseHint {
-    position: relative;
-  
-    display: block;
-  
-    width: 14px;
-    height: 26px;
-  
-    border: 1px solid rgba(232, 230, 225, 0.22);
-  
-    border-radius: 8px;
+
+
+  .navItem {
+    font-size: 12px;
   }
-  
-  
-  .mouseHint i {
-    position: absolute;
-  
-    top: 5px;
-    left: 50%;
-  
-    width: 2px;
-    height: 4px;
-  
-    border-radius: 2px;
-  
-    background: rgba(232, 230, 225, 0.32);
-  
-    transform: translateX(-50%);
+
+
+  .workspaceStatusbar {
+    grid-column: 1;
   }
-  
-  
-  .scrollLine {
-    width: 36px;
-    height: 1px;
-  
-    background: rgba(232, 230, 225, 0.14);
+
+
+  .workspaceStatusbar div:last-child span:first-child {
+    display: none;
   }
-  
-  
-  /* ========================================
-     LARGE SCREEN
-  ======================================== */
-  
-  @media (min-width: 1700px) {
-    .workspaceImage {
-      width: min(73vw, 1460px);
-      height: 90vh;
-    }
-  
-    .imageFade {
-      width: min(80vw, 1540px);
-    }
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 480px) {
+  .workspaceImage {
+    right: -48%;
+
+    width: 180%;
+    height: 62%;
   }
-  
-  
-  /* ========================================
-     MEDIUM / TABLET
-  ======================================== */
-  
-  @media (max-width: 1100px) {
-    .workspaceImage {
-      right: -9vw;
-  
-      width: 92vw;
-      height: 78vh;
-    }
-  
-    .imageFade {
-      width: 100vw;
-  
-      background:
-        linear-gradient(
-          90deg,
-          #101114 0%,
-          rgba(16, 17, 20, 0.92) 17%,
-          rgba(16, 17, 20, 0.3) 45%,
-          transparent 70%
-        ),
-        linear-gradient(
-          180deg,
-          #101114 0%,
-          rgba(16, 17, 20, 0.55) 12%,
-          transparent 34%
-        );
-    }
+
+
+  .roomLayer {
+    transform-origin:
+      70% 60%;
   }
-  
-  
-  /* ========================================
-     MOBILE
-  ======================================== */
-  
-  @media (max-width: 780px) {
-    .hero {
-      min-height: 820px;
-    }
-  
-    .identity {
-      position: relative;
-  
-      top: auto;
-      left: auto;
-  
-      padding: 46px 24px 0;
-    }
-  
-    .title {
-      font-size: clamp(
-        48px,
-        15vw,
-        66px
-      );
-    }
-  
-    .subtitle {
-      margin-top: 18px;
-  
-      font-size: 10px;
-    }
-  
-  
-    /*
-      On mobile the artwork becomes a lower
-      background scene instead of fighting
-      with the title.
-    */
-    .workspaceImage {
-      right: -32%;
-      bottom: 0;
-  
-      width: 150%;
-      height: 66%;
-  
-      background-position: right bottom;
-    }
-  
-  
-    .imageFade {
-      width: 100%;
-      height: 100%;
-  
-      background:
-        linear-gradient(
-          180deg,
-          #101114 0%,
-          #101114 30%,
-          rgba(16, 17, 20, 0.82) 40%,
-          rgba(16, 17, 20, 0.12) 64%,
-          transparent 80%
-        ),
-        linear-gradient(
-          90deg,
-          rgba(16, 17, 20, 0.55),
-          transparent 80%
-        );
-    }
-  
-  
-    .scrollHint {
-      display: none;
-    }
+
+
+  .obsessionTitle {
+    align-items:
+      flex-start;
   }
-  
-  
-  /* ========================================
-     SMALL MOBILE
-  ======================================== */
-  
-  @media (max-width: 480px) {
-    .hero {
-      min-height: 760px;
-    }
-  
-    .workspaceImage {
-      right: -48%;
-  
-      width: 180%;
-      height: 62%;
-    }
+
+
+  .obsessionTitle h3 {
+    font-size: 21px;
   }
+}
+
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .heroJourney {
+    height: 200svh;
+  }
+
+  .roomLayer {
+    transform:
+      none !important;
+  }
+}
