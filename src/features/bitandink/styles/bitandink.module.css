@@ -4529,3 +4529,221 @@ a.playData:active {
     animation: none;
   }
 }
+
+
+/* ========================================
+   ENV PRIVATE CHANNEL
+======================================== */
+
+.envPanel {
+  position: absolute;
+  top: 78px;
+  left: 50%;
+  z-index: 32;
+  width: min(560px, calc(100% - 68px));
+  overflow: hidden;
+  border: 1px solid rgba(117, 255, 180, 0.14);
+  border-radius: 12px;
+  background: rgba(8, 12, 10, 0.96);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+  transform: translateX(-50%);
+  backdrop-filter: blur(18px);
+}
+
+.envPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 48px;
+  padding: 0 14px 0 16px;
+  border-bottom: 1px solid rgba(117, 255, 180, 0.08);
+  background: rgba(117, 255, 180, 0.025);
+}
+
+.envPanelHeader > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.envPanelHeader span,
+.envPanelHeader strong,
+.envTerminal,
+.envNotice span,
+.envNoteFooter,
+.envSendStatus,
+.envFootnote {
+  font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+.envPanelHeader span {
+  color: rgba(166, 244, 191, 0.78);
+  font-size: 10px;
+}
+
+.envPanelHeader strong {
+  color: rgba(236, 234, 229, 0.34);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+}
+
+.envPanelClose {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(236, 234, 229, 0.08);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(236, 234, 229, 0.58);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.envTerminal {
+  min-height: 154px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(117, 255, 180, 0.07);
+  color: rgba(166, 244, 191, 0.5);
+  font-size: 10px;
+  line-height: 1.85;
+}
+
+.envTerminal p {
+  margin: 0;
+}
+
+.envTerminalReady {
+  color: rgba(166, 244, 191, 0.86);
+}
+
+.envNoteArea {
+  padding: 20px;
+}
+
+.envNotice {
+  margin-bottom: 16px;
+}
+
+.envNotice span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(166, 244, 191, 0.68);
+  font-size: 9px;
+}
+
+.envNotice p {
+  margin: 0;
+  color: rgba(236, 234, 229, 0.68);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.envNotice small {
+  display: block;
+  margin-top: 7px;
+  color: rgba(236, 234, 229, 0.28);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.envNoteArea textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  padding: 14px;
+  border: 1px solid rgba(117, 255, 180, 0.12);
+  border-radius: 8px;
+  outline: 0;
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(236, 234, 229, 0.82);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.envNoteArea textarea:focus {
+  border-color: rgba(117, 255, 180, 0.32);
+  box-shadow: 0 0 0 2px rgba(117, 255, 180, 0.035);
+}
+
+.envNoteArea textarea::placeholder {
+  color: rgba(236, 234, 229, 0.2);
+}
+
+.envNoteFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+  color: rgba(236, 234, 229, 0.26);
+  font-size: 8px;
+}
+
+.envNoteFooter button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(117, 255, 180, 0.18);
+  border-radius: 6px;
+  background: rgba(117, 255, 180, 0.05);
+  color: rgba(166, 244, 191, 0.76);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.envNoteFooter button:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.envSendStatus {
+  margin: 14px 0 0;
+  white-space: pre-wrap;
+  color: rgba(236, 234, 229, 0.42);
+  font-size: 9px;
+  line-height: 1.7;
+}
+
+.envSendSuccess {
+  color: rgba(166, 244, 191, 0.72);
+}
+
+.envSendError {
+  color: rgba(255, 180, 180, 0.72);
+}
+
+.envFootnote {
+  margin: 18px 0 0;
+  color: rgba(236, 234, 229, 0.2);
+  font-size: 8px;
+}
+
+@media (max-width: 780px) {
+  .envPanel {
+    top: 58px;
+    width: calc(100% - 28px);
+    max-height: calc(100% - 76px);
+    overflow-y: auto;
+  }
+
+  .envTerminal {
+    min-height: 138px;
+    padding: 16px;
+  }
+
+  .envNoteArea {
+    padding: 16px;
+  }
+
+  .envNoteArea textarea {
+    min-height: 120px;
+    font-size: 16px;
+  }
+}

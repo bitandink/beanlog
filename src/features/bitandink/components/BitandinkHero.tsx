@@ -119,6 +119,120 @@ export default function BitandinkHero() {
   ] = useState(0.92);
 
 
+  const [
+    envPanelOpen,
+    setEnvPanelOpen,
+  ] = useState(false);
+
+  const [
+    envBootStep,
+    setEnvBootStep,
+  ] = useState(0);
+
+  const [
+    envNote,
+    setEnvNote,
+  ] = useState("");
+
+  const [
+    envSendState,
+    setEnvSendState,
+  ] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+
+  const [
+    envSendMessage,
+    setEnvSendMessage,
+  ] = useState("");
+
+
+  useEffect(() => {
+    if (!envPanelOpen) {
+      setEnvBootStep(0);
+      setEnvSendState("idle");
+      setEnvSendMessage("");
+      return;
+    }
+
+    setEnvBootStep(0);
+
+    const timers = [
+      window.setTimeout(
+        () => setEnvBootStep(1),
+        260
+      ),
+      window.setTimeout(
+        () => setEnvBootStep(2),
+        620
+      ),
+      window.setTimeout(
+        () => setEnvBootStep(3),
+        980
+      ),
+      window.setTimeout(
+        () => setEnvBootStep(4),
+        1360
+      ),
+    ];
+
+    return () => {
+      timers.forEach((timer) =>
+        window.clearTimeout(timer)
+      );
+    };
+  }, [envPanelOpen]);
+
+  const sendEnvNote = async () => {
+    const note = envNote.trim();
+
+    if (!note || envSendState === "sending") {
+      return;
+    }
+
+    setEnvSendState("sending");
+    setEnvSendMessage(
+      "> transmitting private variable..."
+    );
+
+    try {
+      const response = await fetch(
+        "/api/env-note",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            note,
+          }),
+        }
+      );
+
+      const payload = await response
+        .json()
+        .catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          payload?.message ||
+            "Transmission failed."
+        );
+      }
+
+      setEnvSendState("sent");
+      setEnvSendMessage(
+        "> delivered to bitandink.\n> variable cleared."
+      );
+      setEnvNote("");
+    } catch {
+      setEnvSendState("error");
+      setEnvSendMessage(
+        "> transmission failed. try again later."
+      );
+    }
+  };
+
   useEffect(() => {
     const audio =
       new Audio(
@@ -707,6 +821,7 @@ export default function BitandinkHero() {
       setPlaygroundObserver(null);
       setBeanGiftBubbleVisible(false);
       setCssLabOpen(false);
+      setEnvPanelOpen(false);
       setPlaygroundScene("idle");
     }
 
@@ -1924,8 +2039,11 @@ export default function BitandinkHero() {
                         styles.playData,
                         styles.playDataSeven,
                       ].join(" ")}
-                      onClick={startHoduSequence}
-                      aria-label="Catch env data"
+                      onClick={() => {
+                        setCssLabOpen(false);
+                        setEnvPanelOpen(true);
+                      }}
+                      aria-label="Open private env note"
                     >
                       .env
                     </button>
@@ -2119,6 +2237,162 @@ export default function BitandinkHero() {
                       >
                         again? ↺
                       </button>
+                    ) : null}
+
+                    {envPanelOpen ? (
+                      <aside
+                        className={styles.envPanel}
+                        aria-label="Private env note"
+                      >
+                        <div
+                          className={styles.envPanelHeader}
+                        >
+                          <div>
+                            <span>.env</span>
+                            <strong>
+                              PRIVATE CHANNEL
+                            </strong>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.envPanelClose}
+                            onClick={() =>
+                              setEnvPanelOpen(false)
+                            }
+                            aria-label="Close private env note"
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div
+                          className={styles.envTerminal}
+                          aria-live="polite"
+                        >
+                          <p>$ open .env</p>
+
+                          {envBootStep >= 1 ? (
+                            <p>
+                              &gt; loading private variables...
+                            </p>
+                          ) : null}
+
+                          {envBootStep >= 2 ? (
+                            <p>
+                              &gt; visitor detected.
+                            </p>
+                          ) : null}
+
+                          {envBootStep >= 3 ? (
+                            <p>
+                              &gt; opening private channel...
+                            </p>
+                          ) : null}
+
+                          {envBootStep >= 4 ? (
+                            <p
+                              className={
+                                styles.envTerminalReady
+                              }
+                            >
+                              &gt; access granted.
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {envBootStep >= 4 ? (
+                          <div
+                            className={styles.envNoteArea}
+                          >
+                            <div
+                              className={styles.envNotice}
+                            >
+                              <span>
+                                SECRET_NOTE=
+                              </span>
+
+                              <p>
+                                bitandink에게만 남기고 싶은
+                                한 문장을 적어도 된다.
+                              </p>
+
+                              <small>
+                                전송된 메모는 이메일로 전달된다.
+                              </small>
+                            </div>
+
+                            <textarea
+                              value={envNote}
+                              onChange={(event) => {
+                                setEnvNote(
+                                  event.target.value.slice(
+                                    0,
+                                    1000
+                                  )
+                                );
+
+                                if (
+                                  envSendState === "error"
+                                ) {
+                                  setEnvSendState("idle");
+                                  setEnvSendMessage("");
+                                }
+                              }}
+                              maxLength={1000}
+                              placeholder="type something..."
+                              aria-label="Secret note to bitandink"
+                            />
+
+                            <div
+                              className={styles.envNoteFooter}
+                            >
+                              <span>
+                                {envNote.length} / 1000
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={sendEnvNote}
+                                disabled={
+                                  !envNote.trim() ||
+                                  envSendState ===
+                                    "sending"
+                                }
+                              >
+                                {envSendState ===
+                                "sending"
+                                  ? "sending..."
+                                  : "send variable"}
+                              </button>
+                            </div>
+
+                            {envSendMessage ? (
+                              <pre
+                                className={[
+                                  styles.envSendStatus,
+                                  envSendState === "sent"
+                                    ? styles.envSendSuccess
+                                    : "",
+                                  envSendState === "error"
+                                    ? styles.envSendError
+                                    : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                              >
+                                {envSendMessage}
+                              </pre>
+                            ) : null}
+
+                            <p
+                              className={styles.envFootnote}
+                            >
+                              // never commit .env
+                            </p>
+                          </div>
+                        ) : null}
+                      </aside>
                     ) : null}
 
                     {cssLabOpen ? (
