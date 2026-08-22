@@ -87,6 +87,11 @@ export default function BitandinkHero() {
     setBeanGiftBubbleVisible,
   ] = useState(false);
 
+  const [
+    giftBalloonPopped,
+    setGiftBalloonPopped,
+  ] = useState(false);
+
 
   const [
     cssLabOpen,
@@ -236,7 +241,7 @@ export default function BitandinkHero() {
   useEffect(() => {
     const audio =
       new Audio(
-        "/bitandink/sounds/thud.mp3"
+        "/bitandink/sounds/thud.wav"
       );
 
     audio.volume = 0.25;
@@ -777,6 +782,7 @@ export default function BitandinkHero() {
     clearPlaygroundTimers();
     setPlaygroundObserver(null);
     setBeanGiftBubbleVisible(false);
+    setGiftBalloonPopped(false);
     setPlaygroundScene("chasing");
 
     schedulePlayground(() => {
@@ -808,10 +814,39 @@ export default function BitandinkHero() {
     }, 4100);
   };
 
+  const popGiftBalloon = () => {
+    if (
+      playgroundScene !== "gift" ||
+      giftBalloonPopped
+    ) {
+      return;
+    }
+
+    const pop =
+      new Audio(
+        "/bitandink/sounds/pop.wav"
+      );
+
+    pop.volume = 0.4;
+
+    void pop
+      .play()
+      .catch((error) => {
+        console.error(
+          "POP SOUND ERROR:",
+          error
+        );
+      });
+
+    setBeanGiftBubbleVisible(false);
+    setGiftBalloonPopped(true);
+  };
+
   const resetPlayground = () => {
     clearPlaygroundTimers();
     setPlaygroundObserver(null);
     setBeanGiftBubbleVisible(false);
+    setGiftBalloonPopped(false);
     setPlaygroundScene("idle");
   };
 
@@ -820,6 +855,7 @@ export default function BitandinkHero() {
       clearPlaygroundTimers();
       setPlaygroundObserver(null);
       setBeanGiftBubbleVisible(false);
+      setGiftBalloonPopped(false);
       setCssLabOpen(false);
       setEnvPanelOpen(false);
       setPlaygroundScene("idle");
@@ -2219,15 +2255,64 @@ export default function BitandinkHero() {
                       ) : null}
                     </div>
 
-                    <div
-                      className={styles.dataBalloon}
+                    <button
+                      type="button"
+                      className={[
+                        styles.dataBalloon,
+                        giftBalloonPopped
+                          ? styles.dataBalloonPopped
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={popGiftBalloon}
+                      disabled={
+                        playgroundScene !== "gift" ||
+                        giftBalloonPopped
+                      }
+                      aria-label="Pop Bean's JSON balloon"
                       aria-hidden={
                         playgroundScene !== "gift"
                       }
                     >
                       <span>.json</span>
                       <i />
-                    </div>
+                    </button>
+
+                    {playgroundScene === "gift" &&
+                    giftBalloonPopped ? (
+                      <div
+                        className={styles.snackRain}
+                        aria-hidden="true"
+                      >
+                        {[
+                          ["🍪", "-82px", "-16deg", "0ms"],
+                          ["🦴", "-54px", "18deg", "90ms"],
+                          ["🍪", "-28px", "-28deg", "160ms"],
+                          ["🦴", "0px", "12deg", "40ms"],
+                          ["🍪", "26px", "24deg", "210ms"],
+                          ["🦴", "52px", "-18deg", "120ms"],
+                          ["🍪", "78px", "30deg", "260ms"],
+                          ["🦴", "96px", "-8deg", "320ms"],
+                          ["🍪", "-98px", "20deg", "300ms"],
+                        ].map(
+                          ([snack, x, rotate, delay], index) => (
+                            <span
+                              key={`${snack}-${index}`}
+                              style={
+                                {
+                                  "--snack-x": x,
+                                  "--snack-rotate": rotate,
+                                  "--snack-delay": delay,
+                                } as React.CSSProperties
+                              }
+                            >
+                              {snack}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    ) : null}
 
                     {playgroundScene === "gift" ? (
                       <button
