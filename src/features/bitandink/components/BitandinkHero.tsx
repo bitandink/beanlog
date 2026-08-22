@@ -8,7 +8,19 @@ import {
 
 import styles from "../styles/bitandink.module.css";
 
-type WorkspaceView = "current" | "archive" | "beanlog" | "perfugium" | "playground";
+type WorkspaceView =
+  | "current"
+  | "archive"
+  | "beanlog"
+  | "perfugium"
+  | "playground";
+
+type PlaygroundScene =
+  | "idle"
+  | "chasing"
+  | "fallen"
+  | "comforting"
+  | "gift";
 
 function clamp(
   value: number,
@@ -42,12 +54,86 @@ export default function BitandinkHero() {
   const workspaceLockedRef = useRef(false);
   const returningToHeroRef = useRef(false);
   const switchTimerRef = useRef<number | null>(null);
+  const playgroundTimersRef = useRef<number[]>([]);
+  const thudAudioRef =
+    useRef<HTMLAudioElement | null>(null);
 
   const [activeView, setActiveView] =
     useState<WorkspaceView>("current");
 
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen,
+  ] = useState(false);
+
   const [isSwitching, setIsSwitching] =
     useState(false);
+
+  const [
+    playgroundScene,
+    setPlaygroundScene,
+  ] = useState<PlaygroundScene>("idle");
+
+  const [
+    playgroundObserver,
+    setPlaygroundObserver,
+  ] = useState<"pama" | "bitandink" | null>(
+    null
+  );
+
+
+  const [
+    beanGiftBubbleVisible,
+    setBeanGiftBubbleVisible,
+  ] = useState(false);
+
+
+  const [
+    cssLabOpen,
+    setCssLabOpen,
+  ] = useState(false);
+
+  const [
+    cssLabFontSize,
+    setCssLabFontSize,
+  ] = useState(18);
+
+  const [
+    cssLabRadius,
+    setCssLabRadius,
+  ] = useState(14);
+
+  const [
+    cssLabLetterSpacing,
+    setCssLabLetterSpacing,
+  ] = useState(0.02);
+
+  const [
+    cssLabRotate,
+    setCssLabRotate,
+  ] = useState(0);
+
+  const [
+    cssLabOpacity,
+    setCssLabOpacity,
+  ] = useState(0.92);
+
+
+  useEffect(() => {
+    const audio =
+      new Audio(
+        "/bitandink/sounds/thud.mp3"
+      );
+
+    audio.volume = 0.25;
+
+    thudAudioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      thudAudioRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const params =
@@ -375,9 +461,37 @@ export default function BitandinkHero() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return;
+    }
+
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [mobileMenuOpen]);
+
   const handleViewChange = (
     nextView: WorkspaceView
   ) => {
+    setMobileMenuOpen(false);
+
     if (
       nextView === activeView ||
       isSwitching
@@ -490,6 +604,8 @@ export default function BitandinkHero() {
   }, []);
 
   const handleReturnToHero = () => {
+    setMobileMenuOpen(false);
+
     /*
       Leaving the workspace is an explicit action.
       Unlock the outer Hero only for this transition.
@@ -510,6 +626,94 @@ export default function BitandinkHero() {
       block: "start",
     });
   };
+
+  const clearPlaygroundTimers = () => {
+    playgroundTimersRef.current.forEach(
+      (timer) => {
+        window.clearTimeout(timer);
+      }
+    );
+
+    playgroundTimersRef.current = [];
+  };
+
+  const schedulePlayground = (
+    callback: () => void,
+    delay: number
+  ) => {
+    const timer =
+      window.setTimeout(
+        callback,
+        delay
+      );
+
+    playgroundTimersRef.current.push(
+      timer
+    );
+  };
+
+  const startHoduSequence = () => {
+    if (
+      playgroundScene !== "idle" &&
+      playgroundScene !== "gift"
+    ) {
+      return;
+    }
+
+    clearPlaygroundTimers();
+    setPlaygroundObserver(null);
+    setBeanGiftBubbleVisible(false);
+    setPlaygroundScene("chasing");
+
+    schedulePlayground(() => {
+      setPlaygroundScene("fallen");
+
+      const thud =
+        thudAudioRef.current;
+
+      if (thud) {
+        thud.currentTime = 0;
+
+        void thud
+          .play()
+          .catch(() => {});
+      }
+    }, 1450);
+
+    schedulePlayground(() => {
+      setPlaygroundScene("comforting");
+    }, 2650);
+
+    schedulePlayground(() => {
+      setPlaygroundScene("gift");
+      setBeanGiftBubbleVisible(true);
+
+      schedulePlayground(() => {
+        setBeanGiftBubbleVisible(false);
+      }, 1800);
+    }, 4100);
+  };
+
+  const resetPlayground = () => {
+    clearPlaygroundTimers();
+    setPlaygroundObserver(null);
+    setBeanGiftBubbleVisible(false);
+    setPlaygroundScene("idle");
+  };
+
+  useEffect(() => {
+    if (activeView !== "playground") {
+      clearPlaygroundTimers();
+      setPlaygroundObserver(null);
+      setBeanGiftBubbleVisible(false);
+      setCssLabOpen(false);
+      setPlaygroundScene("idle");
+    }
+
+    return () => {
+      clearPlaygroundTimers();
+    };
+  }, [activeView]);
 
   const documentClassName = [
     styles.currentDocument,
@@ -571,8 +775,27 @@ export default function BitandinkHero() {
             ref={workspaceShellRef}
             className={styles.workspaceShell}
           >
+            {mobileMenuOpen ? (
+              <button
+                type="button"
+                className={styles.mobileMenuOverlay}
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
+                aria-label="Close workspace menu"
+              />
+            ) : null}
+
             <aside
-              className={styles.workspaceSidebar}
+              id="bitandink-workspace-nav"
+              className={[
+                styles.workspaceSidebar,
+                mobileMenuOpen
+                  ? styles.workspaceSidebarOpen
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <div
                 className={styles.workspaceIdentity}
@@ -724,10 +947,31 @@ export default function BitandinkHero() {
                 </div>
 
                 <div
-                  className={styles.workspaceStatus}
+                  className={styles.workspaceTopbarActions}
                 >
-                  <i />
-                  <span>ACTIVE</span>
+                  <div
+                    className={styles.workspaceStatus}
+                  >
+                    <i />
+                    <span>ACTIVE</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={styles.mobileMenuButton}
+                    onClick={() =>
+                      setMobileMenuOpen((open) => !open)
+                    }
+                    aria-label={
+                      mobileMenuOpen
+                        ? "Close workspace menu"
+                        : "Open workspace menu"
+                    }
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="bitandink-workspace-nav"
+                  >
+                    {mobileMenuOpen ? "×" : "☰"}
+                  </button>
                 </div>
               </header>
 
@@ -1561,27 +1805,534 @@ export default function BitandinkHero() {
                     <h2>Playground</h2>
 
                     <p>
-                      아직 정리되지 않은
-                      장난감 상자.
+                      여긴 별로 쓸모 있는 건 없다.
                     </p>
 
                     <span
                       className={styles.playgroundAside}
                     >
-                      tomorrow, maybe.
+                      대신, 누르면 뭔가 일어날 수도 있다.
+                    </span>
+
+                    <span
+                      className={styles.playgroundStatus}
+                    >
+                      STATUS / QUESTIONABLE
                     </span>
                   </header>
 
-                  <div
-                    className={styles.playgroundPlaceholder}
+                  <section
+                    className={[
+                      styles.playgroundStage,
+                      styles[
+                        `playgroundScene_${playgroundScene}`
+                      ],
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-label="Beanlog resident playground"
                   >
-                    <span>STATUS / NOT READY</span>
+                    <div
+                      className={styles.playgroundHint}
+                    >
+                      <span>HINT_01</span>
+                      <p>
+                        떠다니는 데이터를 누르거나,
+                        캐릭터를 클릭해 보자.
+                      </p>
+                    </div>
 
-                    <p>
-                      작은 게임과 이상한 인터랙션을
-                      넣을 자리만 먼저 열어두었다.
+                    <a
+                      className={[
+                        styles.playData,
+                        styles.playDataOne,
+                      ].join(" ")}
+                      href="https://orange-periwinkle-04b.notion.site/2ef3b18f802880fc8851d0175a7c5398"
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Open bitandink portfolio on Notion"
+                    >
+                      .md
+                    </a>
+
+                    <a
+                      className={[
+                        styles.playData,
+                        styles.playDataTwo,
+                      ].join(" ")}
+                      href="https://bitandink.github.io/portfolio-2026/"
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Open bitandink web portfolio"
+                    >
+                      .json
+                    </a>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataThree,
+                      ].join(" ")}
+                      onClick={() =>
+                        setCssLabOpen(true)
+                      }
+                      aria-label="Open CSS Lab"
+                    >
+                      .css
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataFour,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch text data"
+                    >
+                      .txt
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataFive,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch tsx data"
+                    >
+                      .tsx
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataSix,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch log data"
+                    >
+                      .log
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataSeven,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch env data"
+                    >
+                      .env
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataEight,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch yaml data"
+                    >
+                      .yml
+                    </button>
+
+                    <a
+                      className={[
+                        styles.playData,
+                        styles.playDataNine,
+                      ].join(" ")}
+                      href="https://github.com/bitandink"
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Open bitandink GitHub"
+                    >
+                      .git
+                    </a>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataTen,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch binary data"
+                    >
+                      0101
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataEleven,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch unknown data"
+                    >
+                      ???
+                    </button>
+
+                    <button
+                      type="button"
+                      className={[
+                        styles.playData,
+                        styles.playDataTwelve,
+                      ].join(" ")}
+                      onClick={startHoduSequence}
+                      aria-label="Catch archive data"
+                    >
+                      .zip
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.pamaActor}
+                      onClick={() =>
+                        setPlaygroundObserver(
+                          playgroundObserver === "pama"
+                            ? null
+                            : "pama"
+                        )
+                      }
+                      aria-label="Talk to Pama"
+                    >
+                      <img
+                        src="/bitandink/residents/pama.webp"
+                        alt="Pama"
+                      />
+
+                      {playgroundObserver === "pama" ? (
+                        <span
+                          className={styles.actorBubble}
+                        >
+                          또 저런다.
+                        </span>
+                      ) : null}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.bitandinkActor}
+                      onClick={() =>
+                        setPlaygroundObserver(
+                          playgroundObserver === "bitandink"
+                            ? null
+                            : "bitandink"
+                        )
+                      }
+                      aria-label="Talk to bitandink"
+                    >
+                      <img
+                        src="/bitandink/residents/bitandink-front.webp"
+                        alt="bitandink"
+                      />
+
+                      {playgroundObserver === "bitandink" ? (
+                        <span
+                          className={styles.actorBubble}
+                        >
+                          원래 이거 포트폴리오였는데.
+                        </span>
+                      ) : null}
+                    </button>
+
+                    <div
+                      className={styles.hoduActor}
+                    >
+                      <button
+                        type="button"
+                        className={styles.actorButton}
+                        onClick={startHoduSequence}
+                        aria-label="Play with Hodu"
+                      >
+                        <img
+                          src="/bitandink/residents/hodu.webp"
+                          alt="Hodu"
+                        />
+                      </button>
+
+                      {playgroundScene === "idle" ? (
+                        <span
+                          className={styles.hoduBubble}
+                        >
+                          저건 뭐지?
+                        </span>
+                      ) : null}
+
+                      {playgroundScene === "fallen" ? (
+                        <span
+                          className={styles.hoduBubble}
+                        >
+                          ...
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={styles.beanActor}
+                    >
+                      <img
+                        src="/bitandink/residents/bean.webp"
+                        alt="Bean"
+                      />
+
+                      {playgroundScene === "comforting" ? (
+                        <span
+                          className={styles.beanBubble}
+                        >
+                          또 놓쳤어?
+                        </span>
+                      ) : null}
+
+                      {playgroundScene === "gift" &&
+                      beanGiftBubbleVisible ? (
+                        <span
+                          className={styles.beanBubble}
+                        >
+                          이건 안 도망가.
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={styles.dataBalloon}
+                      aria-hidden={
+                        playgroundScene !== "gift"
+                      }
+                    >
+                      <span>.json</span>
+                      <i />
+                    </div>
+
+                    {playgroundScene === "gift" ? (
+                      <button
+                        type="button"
+                        className={styles.playAgain}
+                        onClick={resetPlayground}
+                      >
+                        again? ↺
+                      </button>
+                    ) : null}
+
+                    {cssLabOpen ? (
+                      <aside
+                        className={styles.cssLabPanel}
+                        aria-label="CSS Lab"
+                      >
+                        <div
+                          className={styles.cssLabHeader}
+                        >
+                          <div>
+                            <span>CSS LAB</span>
+                            <strong>
+                              live style test
+                            </strong>
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.cssLabClose}
+                            onClick={() =>
+                              setCssLabOpen(false)
+                            }
+                            aria-label="Close CSS Lab"
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div
+                          className={styles.cssLabBody}
+                        >
+                          <div
+                            className={styles.cssLabControls}
+                          >
+                            <label>
+                              <span>
+                                font-size
+                                <em>
+                                  {cssLabFontSize}px
+                                </em>
+                              </span>
+
+                              <input
+                                type="range"
+                                min="12"
+                                max="32"
+                                value={cssLabFontSize}
+                                onChange={(event) =>
+                                  setCssLabFontSize(
+                                    Number(
+                                      event.target.value
+                                    )
+                                  )
+                                }
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                border-radius
+                                <em>
+                                  {cssLabRadius}px
+                                </em>
+                              </span>
+
+                              <input
+                                type="range"
+                                min="0"
+                                max="32"
+                                value={cssLabRadius}
+                                onChange={(event) =>
+                                  setCssLabRadius(
+                                    Number(
+                                      event.target.value
+                                    )
+                                  )
+                                }
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                letter-spacing
+                                <em>
+                                  {cssLabLetterSpacing.toFixed(
+                                    2
+                                  )}
+                                  em
+                                </em>
+                              </span>
+
+                              <input
+                                type="range"
+                                min="-0.04"
+                                max="0.16"
+                                step="0.01"
+                                value={cssLabLetterSpacing}
+                                onChange={(event) =>
+                                  setCssLabLetterSpacing(
+                                    Number(
+                                      event.target.value
+                                    )
+                                  )
+                                }
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                rotate
+                                <em>
+                                  {cssLabRotate}deg
+                                </em>
+                              </span>
+
+                              <input
+                                type="range"
+                                min="-12"
+                                max="12"
+                                value={cssLabRotate}
+                                onChange={(event) =>
+                                  setCssLabRotate(
+                                    Number(
+                                      event.target.value
+                                    )
+                                  )
+                                }
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                opacity
+                                <em>
+                                  {cssLabOpacity.toFixed(
+                                    2
+                                  )}
+                                </em>
+                              </span>
+
+                              <input
+                                type="range"
+                                min="0.35"
+                                max="1"
+                                step="0.05"
+                                value={cssLabOpacity}
+                                onChange={(event) =>
+                                  setCssLabOpacity(
+                                    Number(
+                                      event.target.value
+                                    )
+                                  )
+                                }
+                              />
+                            </label>
+                          </div>
+
+                          <div
+                            className={styles.cssLabPreviewWrap}
+                          >
+                            <div
+                              className={styles.cssLabPreview}
+                              style={{
+                                fontSize:
+                                  cssLabFontSize,
+                                borderRadius:
+                                  cssLabRadius,
+                                letterSpacing:
+                                  `${cssLabLetterSpacing}em`,
+                                transform:
+                                  `rotate(${cssLabRotate}deg)`,
+                                opacity:
+                                  cssLabOpacity,
+                              }}
+                            >
+                              <span>
+                                .demo
+                              </span>
+
+                              <strong>
+                                CSS는 생각보다
+                                많이 움직인다.
+                              </strong>
+
+                              <p>
+                                값을 바꾸면 바로
+                                여기서 확인할 수 있다.
+                              </p>
+                            </div>
+
+                            <pre
+                              className={styles.cssLabCode}
+                            >
+{`.demo {
+  font-size: ${cssLabFontSize}px;
+  border-radius: ${cssLabRadius}px;
+  letter-spacing: ${cssLabLetterSpacing.toFixed(2)}em;
+  transform: rotate(${cssLabRotate}deg);
+  opacity: ${cssLabOpacity.toFixed(2)};
+}`}
+                            </pre>
+                          </div>
+                        </div>
+                      </aside>
+                    ) : null}
+
+                    <p
+                      className={styles.playgroundTip}
+                    >
+                      TIP: 여기서는 정답보다
+                      과정이 더 중요할지도.
                     </p>
-                  </div>
+                  </section>
                 </article>
               )}
             </main>
